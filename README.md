@@ -1,93 +1,177 @@
-# TMS - Triage Management System
+Come assistente AI testuale, non posso generare un file fisico (come un `.zip` o un `.md`) che tu possa scaricare con un clic diretto.
 
+Tuttavia, puoi creare il file **in meno di 10 secondi** seguendo questi semplici passaggi. Ho preparato il contenuto in un blocco unico per facilitare l'operazione.
 
+### Istruzioni per creare il file:
 
-## Getting started
+1. Fai clic sul pulsante **"Copia"** nell'angolo in alto a destra del blocco di codice qui sotto.
+2. Apri il tuo editor di testo preferito (Notepad, TextEdit, VS Code, ecc.).
+3. Incolla il testo.
+4. Salva il file con il nome: `README.md` (assicurati che l'estensione sia `.md` e non `.txt`).
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Ecco il contenuto completo:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+```markdown
+# 🦊 GitLab Workflow & Git Cheat Sheet
 
-## Add your files
+Benvenuti! Questa guida serve come riferimento rapido per i comandi Git che utilizziamo quotidianamente nel nostro repository GitLab.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+---
+
+## 🛠 1. Configurazione Iniziale
+Se è la prima volta che usi Git su questa macchina, configura la tua identità per i log di GitLab.
+
+```bash
+# Imposta il tuo nome utente
+git config --global user.name "Il Tuo Nome"
+
+# Imposta la tua email (deve corrispondere a quella su GitLab)
+git config --global user.email "nome.cognome@azienda.com"
+
+# (Opzionale) Colora l'output per renderlo più leggibile
+git config --global color.ui auto
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.di.unipmn.it/RiccardoAccatino/tms-triage-management-system.git
-git branch -M main
-git push -uf origin main
+
+---
+
+## 📥 2. Iniziare (Clonazione e Setup)
+
+Per scaricare il progetto in locale per la prima volta.
+
+```bash
+# Clona il repository (sostituisci l'URL con quello del progetto)
+git clone git@gitlab.com:gruppo/progetto.git
+
+# Entra nella cartella del progetto
+cd progetto
+
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.di.unipmn.it/RiccardoAccatino/tms-triage-management-system/-/settings/integrations)
+## 🔄 3. Flusso di Lavoro Quotidiano
 
-## Collaborate with your team
+La sequenza standard per sviluppare una nuova funzionalità.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### 🌿 A. Creazione Branch
 
-## Test and Deploy
+Non lavorare mai direttamente su `main`. Crea sempre un branch dedicato.
 
-Use the built-in continuous integration in GitLab.
+```bash
+# 1. Spostati sul branch principale e aggiornalo
+git checkout main
+git pull origin main
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# 2. Crea un nuovo branch e spostatici sopra
+# Convenzione: feature/nome-feature, fix/nome-bug
+git checkout -b feature/mia-nuova-funzionalita
+
+```
+
+### 💾 B. Salvare le modifiche (Stage & Commit)
+
+Salva il tuo lavoro in locale.
+
+```bash
+# Controlla lo stato dei file
+git status
+
+# Aggiungi TUTTI i file modificati all'area di staging
+git add .
+
+# OPPURE aggiungi solo un file specifico
+git add percorso/del/file.ext
+
+# Crea il commit con un messaggio chiaro
+git commit -m "feat: aggiunta logica di login utente"
+
+```
+
+### 🚀 C. Pubblicare su GitLab (Push)
+
+Invia le modifiche al server remoto.
+
+```bash
+# La prima volta che carichi il branch
+git push -u origin feature/mia-nuova-funzionalita
+
+# Le volte successive
+git push
+
+```
+
+> **💡 GitLab Pro Tip:** Dopo il push, clicca sul link che appare nel terminale per creare subito la **Merge Request**.
+
+---
+
+## 🤝 4. Sincronizzazione
+
+Se i colleghi hanno pushato codice mentre lavoravi.
+
+```bash
+# Scarica le modifiche dal server senza applicarle
+git fetch origin
+
+# Scarica e unisci le modifiche del branch corrente
+git pull
+
+# (Consigliato) Scarica e riapplica i tuoi commit sopra quelli nuovi
+git pull --rebase origin main
+
+```
+
+---
+
+## 🚑 5. Emergenze e "Undo"
+
+```bash
+# Annullare modifiche a un file (revert locale)
+git checkout -- nomefile.ext
+
+# Rimuovere un file dalla staging area (dopo un 'git add' sbagliato)
+git reset HEAD nomefile.ext
+
+# Mettere da parte le modifiche temporaneamente (Stash)
+git stash
+# Recuperarle dopo
+git stash pop
+
+```
+
+---
+
+## 🧹 6. Pulizia
+
+Manteniamo il repo pulito dopo il merge.
+
+```bash
+# Elimina un branch locale
+git branch -d feature/vecchia-feature
+
+# Elimina un branch forzatamente
+git branch -D feature/esperimento-fallito
+
+```
+
+---
+
+## 📜 Log e Storia
+
+```bash
+# Vedi la storia dei commit (premi 'q' per uscire)
+git log
+
+# Vedi la storia grafica e compatta
+git log --oneline --graph --decorate --all
+
+```
+
+```
 
 ***
 
-# Editing this README
+**Posso fare altro per te?**
+Se vuoi, posso aggiungere una sezione su come gestire i conflitti di merge (che prima o poi capitano a tutti!) o su come usare il file `.gitignore`.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```
