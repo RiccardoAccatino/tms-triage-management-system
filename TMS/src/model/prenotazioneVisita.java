@@ -1,5 +1,14 @@
 package model;
 
+import model.dao.PazienteDao;
+import model.dao.TicketDao;
+import model.pojo.Paziente;
+import model.pojo.Ticket;
+import model.pojo.Visita;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * RF1 - Prenotazione visita
  *
@@ -7,18 +16,15 @@ package model;
  */
 public class prenotazioneVisita extends Visita {
 
-    private PazienteDao pazienteDao = new PazienteDao();
-    private TicketDao ticketDao = new TicketDao();
+    private final PazienteDao pazienteDao;
+    private final TicketDao ticketDao;
 
-    public PrenotazioneVisita() {
-        super();
+    // Costruttore per i TEST (ci permette di inserire i DAO finti)
+    public prenotazioneVisita(PazienteDao pDao, TicketDao tDao) {
+        this.pazienteDao = pDao;
+        this.ticketDao = tDao;
     }
 
-    /**
-     * Esegue la logica dell'RF1:
-     * 1. Salva i dati anagrafici del paziente
-     * 2. Crea un ticket "In Attesa" associato
-     */
     public void registraPrenotazione(Paziente p) {
         // 1. Salviamo il paziente per ottenere il suo ID generato dal DB
         // Il metodo save gestisce già la transazione tra le tabelle 'utente' e 'paziente'
@@ -26,11 +32,10 @@ public class prenotazioneVisita extends Visita {
 
         // 2. Prepariamo il Ticket basandoci sui dati di questa prenotazione
         Ticket t = new Ticket();
-        t.setIdPaziente(p.getIdUtente()); // Usiamo l'ID appena generatoesto dai requisiti [cite: 167, 241]
-        t.setColore("Bianco");            // Codice per prenotazioni non urgenti [cite: 31, 57]
+        t.setIdPaziente(p.getIdUtente()); // Usiamo l'ID appena genera testo dai requisiti
+        t.setColore("Bianco");            // Codice per prenotazioni non urgenti
         t.setPriorita(1);                 // Priorità standard bassa
 
-        // Impostiamo la data e ora corrente come timestamp di creazione
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         t.setTimestamp(LocalDateTime.now().format(dtf));
 
