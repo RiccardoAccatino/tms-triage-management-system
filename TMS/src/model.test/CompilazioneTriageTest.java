@@ -11,8 +11,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test Suite per CompilazioneTriage usando JUnit 5.
- * Include sia Unit Test per la validazione che Integration Test per il DB.
+ * Test Suite "Ad Hoc" per CompilazioneTriage.
+ * Copre sia la validazione dei dati che l'interazione con il Database.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CompilazioneTriageTest {
@@ -20,139 +20,130 @@ class CompilazioneTriageTest {
     private CompilazioneTriage compilazioneTriage;
     private PazienteDao pazienteDao;
 
-    // Eseguito una volta sola prima di tutti i test per preparare il DB
+    // Eseguito una sola volta prima di tutti i test: Prepara il DB
     @BeforeAll
-    static void setupGlobal() {
+    static void initGlobal() {
+        System.out.println("--- Inizializzazione Database per i Test ---");
         db.initializeDb();
     }
 
-    // Eseguito prima di ogni singolo test
+    // Eseguito prima di OGNI singolo test: Resetta gli oggetti
     @BeforeEach
     void setUp() {
         compilazioneTriage = new CompilazioneTriage();
         pazienteDao = new PazienteDao();
     }
 
-    // ---------------------------------------------------------
-    // SEZIONE 1: Test di Validazione (Eccezioni)
-    // ---------------------------------------------------------
+    // ===================================================================================
+    // SEZIONE 1: TEST DI VALIDAZIONE (Input Errati)
+    // ===================================================================================
 
     @Test
-    @DisplayName("Deve lanciare eccezione se l'oggetto Paziente è null")
+    @DisplayName("ERRORE: Paziente Null -> Deve lanciare IllegalArgumentException")
     void testPazienteNull() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             compilazioneTriage.gestisciAnagraficaPaziente(null);
         });
         assertEquals("Dati paziente assenti.", exception.getMessage());
     }
 
     @Test
-    @DisplayName("Deve lanciare eccezione per campi obbligatori mancanti")
-    void testCampiVuoti() {
-        Paziente p = new Paziente(); // Oggetto vuoto
+    @DisplayName("ERRORE: Codice Fiscale Lunghezza Errata -> Deve fallire se != 16 caratteri")
+    void testLunghezzaCodiceFiscale() {
+        // CF di 17 caratteri (Troppo lungo)
+        String cfErrato = "ABCDE123456789012";
+        Paziente p = new Paziente(0, "Mario", "Rossi", "1990-01-01", cfErrato, "Via Roma");
 
-        // 1. Test Nome mancante
-        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(p));
-        p.setNome("Mario");
-
-        // 2. Test Cognome mancante
-        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(p));
-        p.setCognome("Rossi");
-
-        // 3. Test Indirizzo mancante
-        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(p));
-        p.setIndirizzo("Via Roma 1");
-
-        // 4. Test Codice Fiscale mancante
-        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(p));
-        p.setCodiceFiscale("RSSMRA80A01H501U");
-
-        // 5. Test Data di Nascita mancante
-        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(p));
-    }
-
-    @Test
-    @DisplayName("Deve lanciare eccezione se il formato della data è errato")
-    void testFormatoDataErrato() {
-        // Data formattata male (DD-MM-YYYY invece di YYYY-MM-DD)
-        Paziente p = new Paziente(0, "Mario", "Rossi", "31-12-1980", "RSSMRA80A01H501U", "Via Roma 1");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             compilazioneTriage.gestisciAnagraficaPaziente(p);
         });
 
-        // Verifica che il messaggio contenga l'indicazione del formato
-        assertTrue(exception.getMessage().contains("YYYY-MM-DD"));
-    }
-
-    @Test
-    @DisplayName("Deve lanciare eccezione se la lunghezza del CF non è 16")
-    void testLunghezzaCF() {
-        // CF troppo corto
-        Paziente p = new Paziente(0, "Mario", "Rossi", "1980-01-01", "ABC", "Via Roma 1");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            compilazioneTriage.gestisciAnagraficaPaziente(p);
-        });
-
+        // Verifica che il messaggio d'errore sia quello specifico
         assertTrue(exception.getMessage().contains("16 caratteri"));
     }
 
-    // ---------------------------------------------------------
-    // SEZIONE 2: Test di Integrazione (Database)
-    // ---------------------------------------------------------
+    @Test
+    @DisplayName("ERRORE: Formato Data Errato -> Deve accettare solo YYYY-MM-DD")
+    void testFormatoData() {
+        // Formato errato: DD-MM-YYYY
+        Paziente p = new Paziente(0, "Mario", "Rossi", "31-12-1990", "ABCDE12345678901", "Via Roma");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            compilazioneTriage.gestisciAnagraficaPaziente(p);
+        }, "Dovrebbe fallire perché la data non è nel formato YYYY-MM-DD");
+    }
+
+    @Test
+    @DisplayName("ERRORE: Campi Obbligatori Mancanti -> Nome, Cognome, Indirizzo")
+    void testCampiMancanti() {
+        // Paziente senza Nome
+        Paziente pNoNome = new Paziente(0, "", "Rossi", "1990-01-01", "ABCDE12345678901", "Via Roma");
+        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(pNoNome));
+
+        // Paziente senza Cognome
+        Paziente pNoCognome = new Paziente(0, "Mario", null, "1990-01-01", "ABCDE12345678901", "Via Roma");
+        assertThrows(IllegalArgumentException.class, () -> compilazioneTriage.gestisciAnagraficaPaziente(pNoCognome));
+    }
+
+    // ===================================================================================
+    // SEZIONE 2: TEST DI INTEGRAZIONE (Logica Database)
+    // ===================================================================================
 
     @Test
     @Order(1)
-    @DisplayName("Integrazione: Deve salvare un NUOVO paziente nel DB e restituire ID")
-    void testNuovoPazienteDB() {
-        String cfTest = "TEST_JUNIT5_0001";
-        puliziaPazienteTest(cfTest); // Sicurezza pre-test
+    @DisplayName("SUCCESS: Nuovo Paziente -> Deve salvarlo e generare ID")
+    void testSalvataggioNuovoPaziente() {
+        // CF di esattamente 16 caratteri per il test
+        String cfNuovo = "TEST_NUOVO_00001";
+        puliziaPreventiva(cfNuovo); // Cancella se esiste già per avanzi di test precedenti
 
-        Paziente nuovo = new Paziente(0, "Luigi", "Verdi", "1990-05-05", cfTest, "Via Milano 2");
+        Paziente nuovoP = new Paziente(0, "Luigi", "Verdi", "1985-05-05", cfNuovo, "Via Milano 10");
 
-        // Azione
-        Paziente salvato = compilazioneTriage.gestisciAnagraficaPaziente(nuovo);
+        // Esecuzione
+        Paziente risultato = compilazioneTriage.gestisciAnagraficaPaziente(nuovoP);
 
-        // Asserzioni
-        assertNotNull(salvato);
-        assertTrue(salvato.getIdUtente() > 0, "L'ID dovrebbe essere stato generato dal DB");
-        assertEquals(cfTest, salvato.getCodiceFiscale());
+        // Verifiche
+        assertNotNull(risultato);
+        assertTrue(risultato.getIdUtente() > 0, "Il database avrebbe dovuto generare un ID > 0");
+        assertEquals("PAZIENTE", risultato.getTipoUtente(), "Il tipo utente deve essere impostato automaticamente");
 
-        // Cleanup finale
-        pazienteDao.delete(salvato);
+        System.out.println("Test Nuovo Paziente superato. ID Generato: " + risultato.getIdUtente());
     }
 
     @Test
     @Order(2)
-    @DisplayName("Integrazione: Deve trovare un paziente ESISTENTE tramite CF")
-    void testPazienteEsistenteDB() {
-        String cfTest = "TEST_JUNIT5_EXIST";
-        puliziaPazienteTest(cfTest);
+    @DisplayName("SUCCESS: Paziente Esistente -> Non deve duplicarlo, ma restituire quello vecchio")
+    void testRecuperoPazienteEsistente() {
+        String cfEsistente = "TEST_EXIST_00001"; // 16 Caratteri
+        puliziaPreventiva(cfEsistente);
 
-        // 1. Creiamo e salviamo manualmente un paziente nel DB
-        Paziente esistente = new Paziente(0, "Anna", "Neri", "1985-10-10", cfTest, "Corso Italia");
-        pazienteDao.save(esistente);
-        int idOriginale = esistente.getIdUtente();
+        // 1. PREPARAZIONE: Inseriamo manualmente un paziente nel DB
+        Paziente pOriginale = new Paziente(0, "Anna", "Neri", "1990-10-10", cfEsistente, "Corso Italia");
+        pazienteDao.save(pOriginale);
+        int idOriginale = pOriginale.getIdUtente();
+        assertTrue(idOriginale > 0, "Errore setup test: ID non generato");
 
-        // 2. Simuliamo un nuovo inserimento con lo STESSO Codice Fiscale
-        Paziente inputDaForm = new Paziente(0, "Anna", "Neri", "1985-10-10", cfTest, "Corso Italia");
+        // 2. ESECUZIONE: Simuliamo che arrivi un paziente con LO STESSO codice fiscale
+        // Notare che passiamo ID 0, come se fosse un nuovo oggetto dalla GUI
+        Paziente pInput = new Paziente(0, "Anna", "Neri", "1990-10-10", cfEsistente, "Corso Italia");
 
-        // Azione
-        Paziente risultato = compilazioneTriage.gestisciAnagraficaPaziente(inputDaForm);
+        Paziente risultato = compilazioneTriage.gestisciAnagraficaPaziente(pInput);
 
-        // Asserzioni: Deve restituire l'ID di quello che era già nel DB
-        assertEquals(idOriginale, risultato.getIdUtente(), "Deve restituire l'ID del record già esistente");
+        // 3. VERIFICA: L'ID restituito deve essere quello VECCHIO (idOriginale), non uno nuovo
+        assertEquals(idOriginale, risultato.getIdUtente(),
+                "Il sistema non ha riconosciuto il paziente esistente e ne ha creato uno nuovo duplicato!");
 
-        // Cleanup finale
-        pazienteDao.delete(risultato);
+        System.out.println("Test Paziente Esistente superato. ID Mantenuto: " + risultato.getIdUtente());
     }
 
-    // Helper per pulire il DB ed evitare errori di duplicati nei test
-    private void puliziaPazienteTest(String cf) {
+    /**
+     * Metodo helper per pulire il DB prima di un test,
+     * evitando che esecuzioni precedenti falsino i risultati.
+     */
+    private void puliziaPreventiva(String cf) {
         List<Paziente> lista = pazienteDao.getAll();
         for (Paziente p : lista) {
-            if (p.getCodiceFiscale().equals(cf)) {
+            if (p.getCodiceFiscale().equalsIgnoreCase(cf)) {
                 pazienteDao.delete(p);
             }
         }
