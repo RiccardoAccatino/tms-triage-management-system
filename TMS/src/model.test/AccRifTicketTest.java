@@ -2,6 +2,7 @@ package model.test;
 
 import model.accRifTicket;
 import model.dao.TicketDao;
+import dbManager.db;
 import model.pojo.Ticket;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ public class AccRifTicketTest {
 
     @BeforeEach
     public void setUp() {
+        db.initializeDb();
         service = new accRifTicket();
         dao = new TicketDao();
 
