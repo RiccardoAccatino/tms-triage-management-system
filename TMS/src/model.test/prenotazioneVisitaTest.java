@@ -9,14 +9,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test PrenotazioneVisite - RF1
+ *
+ * @author angie
+ */
 class prenotazioneVisitaTest {
     @Test
     void testRegistraPrenotazioneManuale() {
-        // DAO Paziente che assegna ID 500
+        // DAO Paziente che assegna ID 001
         PazienteDao paziente = new PazienteDao() {
             @Override
             public void save(Paziente p) {
-                p.setIdUtente(500);
+                p.setIdUtente(1);
             }
         };
 
@@ -35,8 +40,9 @@ class prenotazioneVisitaTest {
 
         prenotazione.registraPrenotazione(p);
 
-        assertEquals(500, p.getIdUtente());
+        assertEquals(1, p.getIdUtente());
         assertEquals(999, prenotazione.getIdTicket());
-        assertEquals(500, prenotazione.getIdPaziente());
+        assertEquals(1, prenotazione.getIdPaziente());
+        assertEquals("Angie", p.getNome());
     }
 }
