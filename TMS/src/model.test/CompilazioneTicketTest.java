@@ -1,4 +1,4 @@
-package model.test;
-
-public class CompilazioneTicketTest {
+import static org.junit.jupiter.api.Assertions.*;
+class CompilazioneTicketTest {
+  
 }
