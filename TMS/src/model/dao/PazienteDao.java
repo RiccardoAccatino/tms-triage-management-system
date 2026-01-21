@@ -165,15 +165,43 @@ public class PazienteDao implements Dao<Paziente> {
 
     @Override
     public void delete(Paziente paziente) {
-        // Grazie al ON DELETE CASCADE (se impostato nel DB) basterebbe cancellare utente.
-        // Se non è impostato, cancella prima il figlio poi il padre.
-        String sql = "DELETE FROM utente WHERE idUtente = ?";
-        try (Connection conn = db.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, paziente.getIdUtente());
-            pstmt.executeUpdate();
+        String sqlPaziente = "DELETE FROM paziente WHERE idUtente = ?";
+        String sqlUtente = "DELETE FROM utente WHERE idUtente = ?";
+
+        Connection conn = null;
+        try {
+            conn = db.connect();
+            conn.setAutoCommit(false); // Avvia transazione
+
+            // 1. Cancella prima il figlio (Paziente)
+            try (PreparedStatement psP = conn.prepareStatement(sqlPaziente)) {
+                psP.setInt(1, paziente.getIdUtente());
+                psP.executeUpdate();
+            }
+
+            // 2. Cancella poi il padre (Utente)
+            try (PreparedStatement psU = conn.prepareStatement(sqlUtente)) {
+                psU.setInt(1, paziente.getIdUtente());
+                psU.executeUpdate();
+            }
+
+            conn.commit(); // Conferma modifiche
         } catch (SQLException e) {
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             throw new PazienteException("Errore eliminazione paziente: " + e.getMessage());
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
