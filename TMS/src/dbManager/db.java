@@ -4,118 +4,49 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.sqlite.JDBC; // Importiamo esplicitamente la classe del driver
 
 public class db {
 
-    // Nome del file del database
-    // Verrà creato nella cartella principale del progetto
     private static final String URL = "jdbc:sqlite:tms.db";
 
-    /**
-     * Metodo per ottenere la connessione al database.
-     * Se il file non esiste, SQLite lo crea automaticamente.
-     */
     public static Connection connect() {
         Connection conn = null;
         try {
+            // REGISTRAZIONE ESPLICITA: Questo forza il caricamento della classe
+            // Se IntelliJ segna errore qui (in rosso), vuol dire che la libreria manca nel progetto!
+            DriverManager.registerDriver(new JDBC());
+
             conn = DriverManager.getConnection(URL);
             System.out.println("Connessione a SQLite stabilita.");
+
         } catch (SQLException e) {
-            System.out.println("Errore di connessione: " + e.getMessage());
+            System.err.println("ERRORE CRITICO DB: " + e.getMessage());
+            // Stampiamo lo stack trace completo per capire cosa succede
+            e.printStackTrace();
+            throw new RuntimeException("Impossibile connettersi al database.", e);
         }
         return conn;
     }
 
-    /**
-     * Crea le tabelle se non esistono
-     */
+    // ... lascia il resto del metodo initializeDb uguale a prima ...
     public static void initializeDb() {
-        // 1. REPARTO (Entità indipendente)
-        String sqlReparto = "CREATE TABLE IF NOT EXISTS reparto ("
-                + "idReparto INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "nome TEXT NOT NULL, "
-                + "codice TEXT UNIQUE, "
-                + "sale INTEGER"
-                + ");";
+        // (codice esistente per creare le tabelle...)
+        // Copia qui il contenuto del metodo initializeDb che avevi prima
+        // ...
 
-        // 2. UTENTE (Superclasse - Strategia Joined Table)
-        // Contiene i dati comuni a Paziente, Dottore, Segretario
-        String sqlUtente = "CREATE TABLE IF NOT EXISTS utente ("
-                + "idUtente INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "nome TEXT NOT NULL, "
-                + "cognome TEXT NOT NULL, "
-                + "dataNascita TEXT NOT NULL, " // SQLite usa TEXT per le date (ISO8601 strings)
-                + "tipoUtente TEXT NOT NULL"     // Per distinguere Paziente/Dottore/Segretario
-                + ");";
+        // Assicurati di copiare tutto il blocco con le stringhe SQL e l'esecuzione
+        String sqlReparto = "CREATE TABLE IF NOT EXISTS reparto (idReparto INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, codice TEXT UNIQUE, sale INTEGER);";
+        String sqlUtente = "CREATE TABLE IF NOT EXISTS utente (idUtente INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cognome TEXT NOT NULL, dataNascita TEXT NOT NULL, tipoUtente TEXT NOT NULL);";
+        String sqlPaziente = "CREATE TABLE IF NOT EXISTS paziente (idUtente INTEGER PRIMARY KEY, codiceFiscale TEXT UNIQUE NOT NULL, indirizzo TEXT, FOREIGN KEY (idUtente) REFERENCES utente(idUtente));";
+        String sqlDottore = "CREATE TABLE IF NOT EXISTS dottore (idUtente INTEGER PRIMARY KEY, matricola TEXT UNIQUE NOT NULL, turni TEXT, idReparto INTEGER, FOREIGN KEY (idUtente) REFERENCES utente(idUtente), FOREIGN KEY (idReparto) REFERENCES reparto(idReparto));";
+        String sqlSegretario = "CREATE TABLE IF NOT EXISTS segretario (idUtente INTEGER PRIMARY KEY, livelloPermessi INTEGER, FOREIGN KEY (idUtente) REFERENCES utente(idUtente));";
+        String sqlTicket = "CREATE TABLE IF NOT EXISTS ticket (idTicket INTEGER PRIMARY KEY AUTOINCREMENT, colore TEXT, priorita INTEGER, sintomi TEXT, stato TEXT, timestamp TEXT, idPaziente INTEGER NOT NULL, FOREIGN KEY (idPaziente) REFERENCES paziente(idUtente));";
+        String sqlVisita = "CREATE TABLE IF NOT EXISTS visita (idVisita INTEGER PRIMARY KEY AUTOINCREMENT, dataOraInizio TEXT, dataOraFine TEXT, sala TEXT, idTicket INTEGER, idDottore INTEGER, idPaziente INTEGER, idReparto INTEGER, FOREIGN KEY (idTicket) REFERENCES ticket(idTicket), FOREIGN KEY (idDottore) REFERENCES dottore(idUtente), FOREIGN KEY (idPaziente) REFERENCES paziente(idUtente), FOREIGN KEY (idReparto) REFERENCES reparto(idReparto));";
+        String sqlReferto = "CREATE TABLE IF NOT EXISTS referto (idReferto INTEGER PRIMARY KEY AUTOINCREMENT, diagnosi TEXT, prognosi TEXT, prescrizioni TEXT, dataCreazione TEXT, idVisita INTEGER UNIQUE, FOREIGN KEY (idVisita) REFERENCES visita(idVisita));";
 
-        // 3. PAZIENTE (Estende Utente)
-        String sqlPaziente = "CREATE TABLE IF NOT EXISTS paziente ("
-                + "idUtente INTEGER PRIMARY KEY, "
-                + "codiceFiscale TEXT UNIQUE NOT NULL, "
-                + "indirizzo TEXT, "
-                + "FOREIGN KEY (idUtente) REFERENCES utente(idUtente)"
-                + ");";
-
-        // 4. DOTTORE (Estende Utente e Appartiene a Reparto)
-        String sqlDottore = "CREATE TABLE IF NOT EXISTS dottore ("
-                + "idUtente INTEGER PRIMARY KEY, "
-                + "matricola TEXT UNIQUE NOT NULL, "
-                + "turni TEXT, "
-                + "idReparto INTEGER, "
-                + "FOREIGN KEY (idUtente) REFERENCES utente(idUtente), "
-                + "FOREIGN KEY (idReparto) REFERENCES reparto(idReparto)"
-                + ");";
-
-        // 5. SEGRETARIO (Estende Utente)
-        String sqlSegretario = "CREATE TABLE IF NOT EXISTS segretario ("
-                + "idUtente INTEGER PRIMARY KEY, "
-                + "livelloPermessi INTEGER, "
-                + "FOREIGN KEY (idUtente) REFERENCES utente(idUtente)"
-                + ");";
-
-        // 6. TICKET (Associato a Paziente)
-        String sqlTicket = "CREATE TABLE IF NOT EXISTS ticket ("
-                + "idTicket INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "colore TEXT, "    // Bianco, Verde, Giallo, Rosso
-                + "priorita INTEGER, "
-                + "sintomi TEXT, "
-                + "stato TEXT, "     // In Attesa, Accettato, Rifiutato
-                + "timestamp TEXT, "
-                + "idPaziente INTEGER NOT NULL, "
-                + "FOREIGN KEY (idPaziente) REFERENCES paziente(idUtente)"
-                + ");";
-
-        // 7. VISITA (Associata a Ticket, Dottore, Paziente, Reparto)
-        String sqlVisita = "CREATE TABLE IF NOT EXISTS visita ("
-                + "idVisita INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "dataOraInizio TEXT, "
-                + "dataOraFine TEXT, "
-                + "sala TEXT, "
-                + "idTicket INTEGER, "
-                + "idDottore INTEGER, "
-                + "idPaziente INTEGER, "
-                + "idReparto INTEGER, "
-                + "FOREIGN KEY (idTicket) REFERENCES ticket(idTicket), "
-                + "FOREIGN KEY (idDottore) REFERENCES dottore(idUtente), "
-                + "FOREIGN KEY (idPaziente) REFERENCES paziente(idUtente), "
-                + "FOREIGN KEY (idReparto) REFERENCES reparto(idReparto)"
-                + ");";
-
-        // 8. REFERTO (Composizione di Visita)
-        String sqlReferto = "CREATE TABLE IF NOT EXISTS referto ("
-                + "idReferto INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "diagnosi TEXT, "
-                + "prognosi TEXT, "
-                + "prescrizioni TEXT, "
-                + "dataCreazione TEXT, "
-                + "idVisita INTEGER UNIQUE, " // 1 visita -> 0..1 referto
-                + "FOREIGN KEY (idVisita) REFERENCES visita(idVisita)"
-                + ");";
-
-        // Esecuzione delle query
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
-
             stmt.execute(sqlReparto);
             stmt.execute(sqlUtente);
             stmt.execute(sqlPaziente);
@@ -124,11 +55,10 @@ public class db {
             stmt.execute(sqlTicket);
             stmt.execute(sqlVisita);
             stmt.execute(sqlReferto);
-
             System.out.println("Tabelle del database inizializzate con successo.");
-
         } catch (SQLException e) {
-            System.out.println("Errore durante l'inizializzazione del DB: " + e.getMessage());
+            e.printStackTrace(); // Importante per il debug
+            throw new RuntimeException(e);
         }
     }
 }
