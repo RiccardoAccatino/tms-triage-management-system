@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ospedale.controllers.PrenotazioneController">
+
+    <padding>
+        <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
+    </padding>
+
+    <Label text="Nuova Prenotazione" textFill="#2c3e50">
+        <font>
+            <Font name="System Bold" size="24.0" />
+        </font>
+    </Label>
+    <Separator prefWidth="200.0" />
+   <Label style="-fx-font-size: 14; -fx-font-style: italic;" text="Anagrafica Paziente" textFill="#7f8c8d" />
+
+    <VBox maxWidth="500.0" spacing="5.0">
+        <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Paziente:" />
+        <HBox spacing="10.0">
+            <TextField fx:id="nomeField" promptText="Nome" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="cognomeField" promptText="Cognome" HBox.hgrow="ALWAYS" />
+        </HBox>
+    </VBox>
+   <Separator prefWidth="200.0" />
+
+    <HBox maxWidth="500.0" spacing="20.0">
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Reparto:" />
+            <ComboBox fx:id="repartoCombo" maxWidth="Infinity" promptText="Seleziona Reparto" />
+        </VBox>
+
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Dottore:" />
+            <ComboBox fx:id="dottoreCombo" maxWidth="Infinity" promptText="Seleziona Dottore" />
+        </VBox>
+    </HBox>
+
+    <HBox maxWidth="500.0" spacing="20.0">
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Data Visita:" />
+            <DatePicker fx:id="dataVisitaPicker" maxWidth="Infinity" promptText="DD/MM/YYYY" />
+        </VBox>
+
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Orario:" />
+            <ComboBox fx:id="orarioCombo" maxWidth="Infinity" promptText="--:--" />
+        </VBox>
+    </HBox>
+
+    <VBox maxWidth="500.0" spacing="5.0">
+        <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Motivo della visita:" />
+        <TextArea fx:id="motivoArea" prefHeight="100.0" promptText="Descrivi brevemente il motivo della richiesta..." wrapText="true" />
+    </VBox>
+
+    <Label fx:id="erroreLabel" textFill="RED" visible="false" />
+
+    <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 20 0 0 0;">
+        <Button onAction="#vaiAdAccessoUtente" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand;" text="Annulla" />
+
+        <Button onAction="#ConfermaPrenotazione" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="Conferma Prenotazione" />
+    </HBox>
+
+</VBox>
