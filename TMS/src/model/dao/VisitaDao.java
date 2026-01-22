@@ -115,4 +115,35 @@ public class VisitaDao implements Dao<Visita> {
             throw new VisitaException("Errore eliminazione visita: " + e.getMessage());
         }
     }
+
+    /**
+     * Recupera tutte le visite assegnate a un dottore specifico.
+     * Utile per la vista calendario "Personale" del medico - RF4
+     */
+    public List<Visita> getByDottore(int idDottore) {
+        List<Visita> visite = new ArrayList<>();
+        String sql = "SELECT * FROM visita WHERE idDottore = ?";
+        try (Connection conn = db.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, idDottore);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                visite.add(new Visita(
+                        rs.getInt("idVisita"),
+                        rs.getString("dataOraInizio"),
+                        rs.getString("dataOraFine"),
+                        rs.getString("sala"),
+                        rs.getInt("idTicket"),
+                        rs.getInt("idDottore"),
+                        rs.getInt("idPaziente"),
+                        rs.getInt("idReparto")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new VisitaException("Errore recupero visite per dottore: " + e.getMessage());
+        }
+        return visite;
+    }
 }
