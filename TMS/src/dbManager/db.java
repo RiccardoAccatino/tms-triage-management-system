@@ -11,20 +11,26 @@ public class db {
     // Verrà creato nella cartella principale del progetto
     private static final String URL = "jdbc:sqlite:tms.db";
 
-    /**
-     * Metodo per ottenere la connessione al database.
-     * Se il file non esiste, SQLite lo crea automaticamente.
-     */
     public static Connection connect() {
         Connection conn = null;
         try {
+            // 1. FORZIAMO IL CARICAMENTO DEL DRIVER
+            // Questo passaggio è spesso necessario quando si eseguono i test da IDE
+            Class.forName("org.sqlite.JDBC");
+
+            // 2. Creiamo la connessione
             conn = DriverManager.getConnection(URL);
             System.out.println("Connessione a SQLite stabilita.");
+
+        } catch (ClassNotFoundException e) {
+            System.out.println("Errore: Driver SQLite non trovato nel classpath.");
+            e.printStackTrace();
         } catch (SQLException e) {
             System.out.println("Errore di connessione: " + e.getMessage());
         }
         return conn;
     }
+
 
     /**
      * Crea le tabelle se non esistono
