@@ -1,0 +1,149 @@
+Index: TMS/src/model/accRifTicket.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\n\npublic class accRifTicket {\n}\n
+===================================================================
+diff --git a/TMS/src/model/accRifTicket.java b/TMS/src/model/accRifTicket.java
+--- a/TMS/src/model/accRifTicket.java	(revision 25979d61ea38af93be04d405d37dab74f6f63e35)
++++ b/TMS/src/model/accRifTicket.java	(date 1768996552162)
+@@ -1,4 +1,52 @@
+ package model;
+ 
++import model.dao.TicketDao;
++import model.pojo.Ticket;
++import model.exception.TicketException;
++import java.util.List;
++import java.util.stream.Collectors;
++
++
++
+ public class accRifTicket {
++
++    private final TicketDao ticketDao;
++
++    public accRifTicket() {
++        this.ticketDao = new TicketDao();
++    }
++
++    public List<Ticket> getTicketsInAttesa() {
++        try {
++            List<Ticket> allTickets = ticketDao.getAll();
++            return allTickets.stream()
++                    .filter(t -> "IN_ATTESA".equalsIgnoreCase(t.getStato()))
++                    .collect(Collectors.toList());
++
++        } catch (TicketException e) {
++            throw new RuntimeException("Errore durante il recupero della lista ticket", e);
++        }
++    }
++
++    public Ticket valutaTicket(int ticketId, boolean isAccepted) {
++        Ticket ticket = ticketDao.get(ticketId);
++
++        if (ticket == null) {
++            throw new IllegalArgumentException("Ticket non trovato con ID: " + ticketId);
++        }
++
++        if (isAccepted) {
++            ticket.setStato("ACCETTATO");
++        } else {
++            ticket.setStato("RIFIUTATO");
++        }
++
++        try {
++            ticketDao.update(ticket);
++        } catch (TicketException e) {
++            throw new RuntimeException("Errore durante l'aggiornamento dello stato del ticket", e);
++        }
++
++        return ticket;
++    }
+ }
+Index: TMS/src/model.test/accRifTicketTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import static org.junit.jupiter.api.Assertions.*;\nclass accRifTicketTest {\n  \n}
+===================================================================
+diff --git a/TMS/src/model.test/accRifTicketTest.java b/TMS/src/model.test/accRifTicketTest.java
+--- a/TMS/src/model.test/accRifTicketTest.java	(revision 25979d61ea38af93be04d405d37dab74f6f63e35)
++++ b/TMS/src/model.test/accRifTicketTest.java	(date 1768996779328)
+@@ -1,4 +1,76 @@
++package model.test;
++
++import model.accRifTicket;
++import model.dao.TicketDao;
++import model.pojo.Ticket;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.*;
+-class accRifTicketTest {
+-  
++
++import java.util.List;
++
++public class accRifTicketTest {
++
++    private accRifTicket service;
++    private TicketDao dao;
++    private Ticket ticketDiProva;
++
++    @BeforeEach
++    public void setUp() {
++        service = new accRifTicket();
++        dao = new TicketDao();
++
++        ticketDiProva = new Ticket(0, "Bianco", 1, "Test JUnit", "IN_ATTESA", "2023-10-01 10:00", 1);
++
++        dao.save(ticketDiProva);
++    }
++
++
++    @AfterEach
++    public void tearDown() {
++
++        if (ticketDiProva != null && ticketDiProva.getIdTicket() > 0) {
++            dao.delete(ticketDiProva);
++        }
++    }
++
++    @Test
++    public void testGetTicketsInAttesa() {
++        List<Ticket> lista = service.getTicketsInAttesa();
++
++        assertNotNull(lista, "La lista non dovrebbe essere null");
++
++        boolean trovato = false;
++        for (Ticket t : lista) {
++            if (t.getIdTicket() == ticketDiProva.getIdTicket()) {
++                trovato = true;
++                break;
++            }
++        }
++        assertTrue(trovato, "Il ticket inserito (IN_ATTESA) dovrebbe essere presente nella lista recuperata");
++    }
++
++    @Test
++    public void testValutaTicket_Accettazione() {
++
++        Ticket ticketAggiornato = service.valutaTicket(ticketDiProva.getIdTicket(), true);
++
++
++        assertEquals("ACCETTATO", ticketAggiornato.getStato(), "L'oggetto ritornato deve avere stato ACCETTATO");
++
++        Ticket ticketDalDb = dao.get(ticketDiProva.getIdTicket());
++        assertEquals("ACCETTATO", ticketDalDb.getStato(), "Nel database lo stato deve essere ACCETTATO");
++    }
++
++    @Test
++    public void testValutaTicket_Rifiuto() {
++
++        Ticket ticketAggiornato = service.valutaTicket(ticketDiProva.getIdTicket(), false);
++
++        assertEquals("RIFIUTATO", ticketAggiornato.getStato(), "L'oggetto ritornato deve avere stato RIFIUTATO");
++
++        Ticket ticketDalDb = dao.get(ticketDiProva.getIdTicket());
++        assertEquals("RIFIUTATO", ticketDalDb.getStato(), "Nel database lo stato deve essere RIFIUTATO");
++    }
+ }
+\ No newline at end of file
