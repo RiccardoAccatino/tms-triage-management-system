@@ -38,7 +38,7 @@ class CompilazioneTicketTest {
         assertEquals(priorita, risultato.getPriorita());
         assertEquals(sintomi, risultato.getSintomi());
 
-        assertEquals("In Attesa", risultato.getStato(), "Lo stato iniziale deve essere 'In Attesa'");
+        assertEquals("IN_ATTESA", risultato.getStato(), "Lo stato iniziale deve essere 'IN_ATTESA'");
         assertNotNull(risultato.getTimestamp(), "Il timestamp non deve essere nullo");
 
         System.out.println("Test passato! Ticket generato con timestamp: " + risultato.getTimestamp());
