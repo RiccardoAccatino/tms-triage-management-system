@@ -11,20 +11,21 @@ import java.io.IOException;
 
 public class MenuController {
 
-    @FXML
-    private void VaiAPrenotazione(ActionEvent event) throws IOException {
-        cambiaScena(event, "/gui.vista/PannelloPrenotazioneVisita.xfml");
+    public void ApriCalendarioGenerale(ActionEvent actionEvent) {
     }
 
-    @FXML
-    private void VaiATriage(ActionEvent event) throws IOException {
-        cambiaScena(event, "/gui.vista/PannellloTriage.xfml");
+    public void TornaAlMenu(ActionEvent actionEvent) {
+        
     }
 
-    private void cambiaScena(ActionEvent event, String fxmlPath) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    public void VisualizzaCalendario(ActionEvent actionEvent) {
     }
+
+    public void CreaNuovoTicket(ActionEvent actionEvent) {
+    }
+
+    public void AccettaTicket(ActionEvent actionEvent) {
+        
+    }
+
 }
