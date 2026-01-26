@@ -64,15 +64,16 @@ class CompilazioneTicketTest {
 
         assertEquals("IN_ATTESA", risultato.getStato(), "Lo stato iniziale deve essere 'IN_ATTESA'");
         assertNotNull(risultato.getTimestamp(), "Il timestamp non deve essere nullo");
-
-    @Test
-    void testCreaTicket_SenzaLogin_DeveLanciareEccezione() {
-        Exception exception = assertThrows(SecurityException.class, () -> {
-            service.creaTicket("Verde", 1, "Mal di testa");
-        });
-
-        assertEquals("Operazione non consentita: Nessun paziente loggato.", exception.getMessage());
-
-        System.out.println("Test Sicurezza Superato: Bloccato tentativo senza login.");
     }
+
+        @Test
+        void testCreaTicket_SenzaLogin_DeveLanciareEccezione () {
+            Exception exception = assertThrows(SecurityException.class, () -> {
+                service.creaTicket("Verde", 1, "Mal di testa");
+            });
+
+            assertEquals("Operazione non consentita: Nessun paziente loggato.", exception.getMessage());
+
+            System.out.println("Test Sicurezza Superato: Bloccato tentativo senza login.");
+        }
 }
