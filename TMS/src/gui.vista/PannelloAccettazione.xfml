@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ospedale.controllers.TicketManagerController">
+
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Button onAction="#TornaAlMenu" style="-fx-background-color: transparent; -fx-border-color: #95a5a6; -fx-border-radius: 5; -fx-text-fill: #7f8c8d; -fx-cursor: hand;" text="← Indietro" />
+
+        <Separator orientation="VERTICAL" />
+
+        <VBox>
+            <Label text="Gestione Coda Ticket" textFill="#2c3e50">
+                <font>
+                    <Font name="System Bold" size="24.0" />
+                </font>
+            </Label>
+            <Label text="Visualizza, accetta o rifiuta le richieste" textFill="#7f8c8d">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Button onAction="#CaricaDati" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;" text="↻ Aggiorna Lista" />
+    </HBox>
+
+    <Separator />
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: #f4f4f4;" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox fx:id="ticketsContainer" spacing="15.0" style="-fx-background-color: #f4f4f4;">
+                <padding>
+                    <Insets bottom="10.0" left="5.0" right="15.0" top="10.0" />
+                </padding>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</VBox>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ospedale.controllers.TriageController">
+
+    <padding>
+        <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
+    </padding>
+
+    <Label text="Accettazione Triage" textFill="#2c3e50">
+        <font>
+            <Font name="System Bold" size="24.0" />
+        </font>
+    </Label>
+    <Separator prefWidth="200.0" />
+
+    <Label style="-fx-font-size: 14; -fx-font-style: italic;" text="Anagrafica Paziente" textFill="#7f8c8d" />
+
+    <VBox maxWidth="500.0" spacing="5.0">
+        <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Nome e Cognome:" />
+        <HBox spacing="10.0">
+            <TextField fx:id="nomeField" promptText="Nome" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="cognomeField" promptText="Cognome" HBox.hgrow="ALWAYS" />
+        </HBox>
+    </VBox>
+
+    <HBox maxWidth="500.0" spacing="20.0">
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Codice Fiscale:" />
+            <TextField fx:id="cfField" maxWidth="Infinity" promptText="16 Caratteri" />
+        </VBox>
+
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Data di Nascita:" />
+            <DatePicker fx:id="dataNascitaPicker" maxWidth="Infinity" promptText="DD/MM/YYYY" />
+        </VBox>
+    </HBox>
+
+    <VBox maxWidth="500.0" spacing="5.0" />
+
+    <Separator prefWidth="500.0" style="-fx-opacity: 0.5;" />
+
+       <VBox maxWidth="500.0" spacing="5.0">
+        <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Sintomi :" />
+        <TextArea fx:id="sintomiArea" prefHeight="80.0" promptText="Descrizione dei sintomi..." wrapText="true" />
+    </VBox>
+
+    <HBox maxWidth="500.0" spacing="20.0">
+        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Scala Dolore:" />
+            <ComboBox fx:id="coloreCombo" maxWidth="Infinity" promptText="Livello" />
+        </VBox>
+    </HBox>
+
+    <Label fx:id="erroreLabel" maxWidth="500.0" textFill="RED" visible="false" wrapText="true" />
+
+    <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 20 0 0 0;">
+        <Button onAction="#vaiAdAccessoUtente" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-cursor: hand;" text="Indietro" />
+
+        <Button onAction="#CreaTicket" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="Crea Ticket Triage" />
+    </HBox>
+
+</VBox>
