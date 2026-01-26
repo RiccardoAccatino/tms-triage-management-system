@@ -20,13 +20,18 @@ public class CompilazioneTriage {
 
     /**
      * Gestisce l'identificazione o registrazione del paziente con VALIDAZIONE.
+     * Accessibile SOLO a Dottori e Segretari.
+     * * @throws SecurityException se l'utente loggato non ha i permessi.
      */
     public Paziente gestisciAnagraficaPaziente(Paziente pNuovo) {
 
-        // 1. VALIDAZIONE DEI DATI
+        // 1. CONTROLLO SICUREZZA (Sessione)
+        checkPermessiPersonale();
+
+        // 2. VALIDAZIONE DEI DATI
         validaDatiPaziente(pNuovo);
 
-        // 2. LOGICA DI BUSINESS (Recupero o Salvataggio)
+        // 3. LOGICA DI BUSINESS (Recupero o Salvataggio)
         List<Paziente> tuttiPazienti = pazienteDao.getAll();
 
         for (Paziente esistente : tuttiPazienti) {
@@ -40,6 +45,23 @@ public class CompilazioneTriage {
             return pNuovo;
         } catch (Exception e) {
             throw new RuntimeException("Errore tecnico durante la registrazione: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Verifica che l'utente loggato sia un membro dello staff (Dottore o Segretario).
+     */
+    private void checkPermessiPersonale() {
+        Sessione s = Sessione.getInstance();
+
+        // Nessuno loggato
+        if (s.getUtenteLoggato() == null) {
+            throw new SecurityException("Operazione non consentita: Nessun utente loggato.");
+        }
+
+        // Controllo ruolo: Solo Dottori o Segretari possono gestire l'anagrafica
+        if (!s.isDottore() && !s.isSegretario()) {
+            throw new SecurityException("Accesso Negato: Solo il personale autorizzato può gestire l'anagrafica.");
         }
     }
 
