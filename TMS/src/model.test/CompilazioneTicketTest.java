@@ -62,8 +62,8 @@ class CompilazioneTicketTest {
         assertEquals("IN_ATTESA", risultato.getStato());
         assertNotNull(risultato.getTimestamp());
 
-        System.out.println("Test Successo: Ticket creato correttamente per Paziente ID " + risultato.getIdPaziente());
-    }
+        assertEquals("IN_ATTESA", risultato.getStato(), "Lo stato iniziale deve essere 'IN_ATTESA'");
+        assertNotNull(risultato.getTimestamp(), "Il timestamp non deve essere nullo");
 
     @Test
     void testCreaTicket_SenzaLogin_DeveLanciareEccezione() {
