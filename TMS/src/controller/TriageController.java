@@ -88,7 +88,7 @@ public class TriageController {
             };
 
             // CHIAMATA AL MODELLO
-            ticketService.creaTicket(colore, priorita, sintomi,id);
+            ticketService.creaTicket(colore, priorita, sintomi, idPaziente);
 
             mostraSuccesso("Ticket creato con successo! Codice Colore: " + colore);
             vaiAdAccessoUtente(null);
