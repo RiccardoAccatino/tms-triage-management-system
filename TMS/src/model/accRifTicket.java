@@ -54,6 +54,7 @@ public class accRifTicket {
 
         if (isAccepted) {
             ticket.setStato("ACCETTATO");
+
         } else {
             ticket.setStato("RIFIUTATO");
         }

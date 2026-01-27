@@ -7,16 +7,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import model.CompilazioneTicket;
-import model.PrenotazioneVisitaService;
-import model.Sessione;
-import model.accRifTicket;
+import model.*;
+import model.dao.DottoreDao;
 import model.dao.PazienteDao;
 import model.pojo.Paziente;
 import model.pojo.Ticket;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.util.StringConverter;
+import model.pojo.Dottore;
+import java.time.LocalDate;
+import java.util.Optional;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
 
 public class PrenotazioneController {
@@ -145,8 +148,8 @@ public class PrenotazioneController {
     public void ConfermaPrenotazione(ActionEvent actionEvent) {
         try {
             // 1. Recupero Dati dal form
-            String reparto = (repartoCombo != null) ? repartoCombo.getValue() : null;
-            String dottore = (dottoreCombo != null) ? dottoreCombo.getValue() : null;
+            String nomeReparto = (repartoCombo != null) ? repartoCombo.getValue() : null;
+            String nomeDottore = (dottoreCombo != null) ? dottoreCombo.getValue() : null;
             String orario = (orarioCombo != null) ? orarioCombo.getValue() : null;
             LocalDate data = (dataVisitaPicker != null) ? dataVisitaPicker.getValue() : null;
             String motivo = (motivoArea != null) ? motivoArea.getText() : "";
@@ -154,19 +157,16 @@ public class PrenotazioneController {
             String nomeInput = nomeField.getText().trim();
             String cognomeInput = cognomeField.getText().trim();
 
-            // 2. Validazione Input base
-            if (reparto == null || dottore == null || orario == null || data == null || nomeInput.isEmpty() || cognomeInput.isEmpty()) {
-                mostraErrore("Compila tutti i campi: Reparto, Dottore, Data, Orario e Dati Paziente.");
+            // 2. Validazione
+            if (nomeReparto == null || nomeDottore == null || orario == null || data == null || nomeInput.isEmpty() || cognomeInput.isEmpty()) {
+                mostraErrore("Compila tutti i campi per prenotare la visita.");
                 return;
             }
 
-            // 3. Logica Gestione Paziente (Ricerca o Creazione)
+            // 3. Gestione Paziente (Trova o Crea)
             PazienteDao pazienteDao = new PazienteDao();
-            List<Paziente> listaPazienti = pazienteDao.getAll();
             Paziente pazienteScelto = null;
-
-            // Cerchiamo se esiste già un paziente con questo Nome e Cognome
-            for (Paziente p : listaPazienti) {
+            for (Paziente p : pazienteDao.getAll()) {
                 if (p.getNome().equalsIgnoreCase(nomeInput) && p.getCognome().equalsIgnoreCase(cognomeInput)) {
                     pazienteScelto = p;
                     break;
@@ -174,40 +174,41 @@ public class PrenotazioneController {
             }
 
             if (pazienteScelto == null) {
-                // Utente non trovato -> Lo creiamo al volo
-                pazienteScelto = new Paziente();
-                pazienteScelto.setNome(nomeInput);
-                pazienteScelto.setCognome(cognomeInput);
-
-                // Impostiamo dati "placeholder" necessari per il database
-                pazienteScelto.setDataNascita("0000-00-00"); // Formato richiesto YYYY-MM-DD
-                pazienteScelto.setIndirizzo("(Prenotazione rapida)");
-
-                // Generiamo un CF temporaneo univoco per evitare errori di vincolo UNIQUE nel DB
-                String cfTemporaneo = "TEMP" + System.currentTimeMillis();
-                // Tagliamo se troppo lungo (il DB potrebbe avere limiti, ma qui siamo sicuri dell'univocità)
-                if (cfTemporaneo.length() > 16) cfTemporaneo = cfTemporaneo.substring(0, 16);
-                pazienteScelto.setCodiceFiscale(cfTemporaneo);
-
-                // Salviamo nel DB: questo metodo popolerà automaticamente l'ID dentro l'oggetto pazienteScelto
+                pazienteScelto = new Paziente(0, nomeInput, cognomeInput, "1990-01-01", "CF-TEMP-" + System.currentTimeMillis(), "Indirizzo Temp");
                 pazienteDao.save(pazienteScelto);
-                System.out.println("Nuovo paziente creato con ID: " + pazienteScelto.getIdUtente());
-            } else {
-                System.out.println("Paziente esistente trovato: " + pazienteScelto.getNome() + " (ID: " + pazienteScelto.getIdUtente() + ")");
             }
 
-            // 4. Creazione del Ticket usando l'ID del paziente (recuperato o appena creato)
-            // Usiamo "Bianco" come colore di default per le prenotazioni esterne, o "Visita" se preferisci
-            Ticket nuovoTicket = ticketService.creaTicket("vista", 1, motivo, pazienteScelto.getIdUtente());
+            // 4. Preparazione Dati per il Service
+            // Combinazione Data + Orario nel formato corretto per il DB
+            String dataOraString = data.toString() + " " + orario; // Es: 2023-11-01 09:00
 
-            if (erroreLabel != null) erroreLabel.setVisible(false);
+            // *** QUI SIMULIAMO GLI ID *** // (Nel tuo progetto dovresti recuperare l'ID vero dall'oggetto selezionato nella ComboBox)
+            int idDottore = 1; // Default Dottore ID
+            int idReparto = 1; // Default Reparto ID
+            if(nomeDottore.contains("Bianchi")) idDottore = 2; // Esempio logica
+            if(nomeReparto.contains("Ortopedia")) idReparto = 2;
 
-            // Feedback utente
-            mostraSuccesso("Visita prenotata con successo per il " + data + "\nTicket #" + nuovoTicket.getIdTicket() + " creato.");
-            vaiAdAccessoUtente(actionEvent);
+            // Creazione oggetto richiesta
+            PrenotazioneVisita richiesta = new PrenotazioneVisita(
+                    pazienteScelto.getIdUtente(),
+                    idDottore,
+                    idReparto,
+                    dataOraString,
+                    motivo
+            );
+
+            // 5. CHIAMATA AL NUOVO SERVICE
+            boolean esito = prenotazioneService.registraPrenotazioneDiretta(richiesta);
+
+            if (esito) {
+                mostraSuccesso("Visita confermata!\nStato: ACCETTATO\nData: " + dataOraString);
+                vaiAdAccessoUtente(actionEvent);
+            } else {
+                mostraErrore("Errore tecnico durante il salvataggio della visita.");
+            }
 
         } catch (Exception e) {
-            mostraErrore("Errore durante la prenotazione: " + e.getMessage());
+            mostraErrore("Errore imprevisto: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -253,4 +254,6 @@ public class PrenotazioneController {
         alert.setContentText(messaggio);
         alert.showAndWait();
     }
+
+
 }

@@ -1,7 +1,10 @@
 package model;
 
 import model.dao.TicketDao;
+import model.dao.VisitaDao;
 import model.pojo.Ticket;
+import model.pojo.Visita;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -12,55 +15,70 @@ import java.time.format.DateTimeFormatter;
  */
 public class PrenotazioneVisitaService {
     private final TicketDao ticketDao;
+    private final VisitaDao visitaDao;
 
     public PrenotazioneVisitaService() {
+        this.visitaDao = new VisitaDao();
         this.ticketDao = new TicketDao();
     }
 
     /**
-     * Prende i dati dalla richiesta dell'utente e crea un Ticket nel database.
-     *
-     * @param richiesta L'oggetto DTO con i dati della prenotazione.
-     * @return true se il salvataggio avviene con successo, false altrimenti.
+     * Crea un Ticket già ACCETTATO e genera subito la VISITA corrispondente.
      */
-    public boolean salvaPrenotazioneComeTicket(PrenotazioneVisita richiesta) {
+    public boolean registraPrenotazioneDiretta(PrenotazioneVisita richiesta) {
         try {
-            // Creiamo l'oggetto POJO Ticket che rispecchia la tabella nel DB
+            // --- 1. CREAZIONE TICKET (Già Accettato) ---
             Ticket nuovoTicket = new Ticket();
-
-            // 1. Colleghiamo il paziente
             nuovoTicket.setIdPaziente(richiesta.getIdPaziente());
+            nuovoTicket.setColore("Verde"); // Priorità standard per prenotazioni
+            nuovoTicket.setPriorita(1);
 
-            // 2. Impostiamo lo stato iniziale richiesto dal caso d'uso UC1
-            nuovoTicket.setStato(richiesta.getStato());
+            // Impostiamo direttamente lo stato su ACCETTATO
+            nuovoTicket.setStato("ACCETTATO");
 
-            // 3. Valori predefiniti per una prenotazione esterna
-            nuovoTicket.setColore("Bianco"); // Codice colore base per visite non urgenti
-            nuovoTicket.setPriorita(1);      // Priorità minima
+            String desc = String.format("Prenotazione Diretta - Motivo: %s", richiesta.getMotivo());
+            nuovoTicket.setSintomi(desc);
 
-            // 4. Gestione dati extra (Dottore e Reparto)
-            // Dato che la tabella 'ticket' non ha questi campi, li inseriamo nel campo 'sintomi'
-            // come stringa formattata. Il Segretario li leggerà da qui per creare la Visita.
-            String dettagliDallaRichiesta = String.format(
-                    "PRENOTAZIONE ESTERNA - Dottore ID: %d, Reparto ID: %d. Motivo: %s",
-                    richiesta.getIdDottore(),
-                    richiesta.getIdReparto(),
-                    richiesta.getMotivo()
-            );
-            nuovoTicket.setSintomi(dettagliDallaRichiesta);
-
-            // 5. Generiamo il timestamp di creazione attuale
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             nuovoTicket.setTimestamp(dtf.format(LocalDateTime.now()));
 
-            // 6. Salvataggio definitivo tramite il DAO
+            // Salviamo il ticket per ottenere l'ID generato
             ticketDao.save(nuovoTicket);
+            int idTicketGenerato = nuovoTicket.getIdTicket();
 
-            System.out.println("Service: Ticket #" + nuovoTicket.getIdTicket() + " creato per il paziente ID " + richiesta.getIdPaziente());
+            // --- 2. CREAZIONE VISITA ---
+            Visita nuovaVisita = new Visita();
+            nuovaVisita.setIdTicket(idTicketGenerato);
+            nuovaVisita.setIdPaziente(richiesta.getIdPaziente());
+            nuovaVisita.setIdDottore(richiesta.getIdDottore());
+            nuovaVisita.setIdReparto(richiesta.getIdReparto());
+
+            // Impostiamo Data e Ora scelte dal paziente
+            // (La richiesta.getDataOraRichiesta() deve essere nel formato "yyyy-MM-dd HH:mm")
+            nuovaVisita.setDataOraInizio(richiesta.getDataOraRichiesta());
+
+            // Calcoliamo una data fine fittizia (es. +30 minuti) per completezza DB
+            // Nota: Qui facciamo un parsing semplice, assicurati che la stringa sia corretta
+            try {
+                LocalDateTime inizio = LocalDateTime.parse(richiesta.getDataOraRichiesta(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                LocalDateTime fine = inizio.plusMinutes(30);
+                nuovaVisita.setDataOraFine(fine.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            } catch (Exception e) {
+                // Fallback se il formato non è perfetto
+                nuovaVisita.setDataOraFine(richiesta.getDataOraRichiesta());
+            }
+
+            nuovaVisita.setSala("Ambulatorio " + richiesta.getIdReparto()); // Assegnazione sala automatica o fittizia
+
+            // Salviamo la visita
+            visitaDao.save(nuovaVisita);
+
+            System.out.println("Prenotazione completata: Ticket #" + idTicketGenerato + " -> Visita creata.");
             return true;
 
         } catch (Exception e) {
-            System.err.println("Errore durante la creazione del ticket: " + e.getMessage());
+            System.err.println("Errore prenotazione diretta: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
