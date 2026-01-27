@@ -134,8 +134,4 @@ public class MenuController {
         alert.setContentText(msg);
         alert.showAndWait();
     }
-
-    public void CreaNuovoTicketDottore(ActionEvent actionEvent) {
-        //non da implementare RF10
-    }
 }

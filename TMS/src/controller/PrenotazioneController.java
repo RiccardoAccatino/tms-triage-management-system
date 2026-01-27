@@ -11,6 +11,7 @@ import model.CompilazioneTicket;
 import model.PrenotazioneVisitaService;
 import model.Sessione;
 import model.accRifTicket;
+import model.dao.PazienteDao;
 import model.pojo.Paziente;
 import model.pojo.Ticket;
 
@@ -39,11 +40,12 @@ public class PrenotazioneController {
     private final PrenotazioneVisitaService prenotazioneService = new PrenotazioneVisitaService();
     private final accRifTicket accettazioneService = new accRifTicket();
 
+
     @FXML
     public void initialize() {
         // 1. SETUP SESSIONE (Simulazione se necessario per evitare NullPointer sul Paziente)
         if (Sessione.getInstance().getUtenteLoggato() == null) {
-            Paziente pFake = new Paziente(1, "Test", "User", "1990-01-01", "CFTEST", "Via Roma");
+            Paziente pFake = new Paziente(1, "Test", "User", "1990-01-01", "0000000000000000", "Via Roma");
             Sessione.getInstance().setUtenteLoggato(pFake);
         }
 
@@ -130,6 +132,9 @@ public class PrenotazioneController {
             accettazioneService.valutaTicket(id, accettato);
             caricaTicketsDalDb(); // Refresh della lista
             mostraSuccesso("Ticket " + (accettato ? "accettato" : "rifiutato") + " con successo.");
+
+
+
         } catch (Exception e) {
             mostraErrore("Errore durante l'operazione: " + e.getMessage());
         }
@@ -139,27 +144,70 @@ public class PrenotazioneController {
     @FXML
     public void ConfermaPrenotazione(ActionEvent actionEvent) {
         try {
-            // Recupero Dati
+            // 1. Recupero Dati dal form
             String reparto = (repartoCombo != null) ? repartoCombo.getValue() : null;
             String dottore = (dottoreCombo != null) ? dottoreCombo.getValue() : null;
             String orario = (orarioCombo != null) ? orarioCombo.getValue() : null;
             LocalDate data = (dataVisitaPicker != null) ? dataVisitaPicker.getValue() : null;
             String motivo = (motivoArea != null) ? motivoArea.getText() : "";
 
-            // Validazione Input
-            if (reparto == null || dottore == null || orario == null || data == null) {
-                mostraErrore("Seleziona Reparto, Dottore, Data e Orario.");
+            String nomeInput = nomeField.getText().trim();
+            String cognomeInput = cognomeField.getText().trim();
+
+            // 2. Validazione Input base
+            if (reparto == null || dottore == null || orario == null || data == null || nomeInput.isEmpty() || cognomeInput.isEmpty()) {
+                mostraErrore("Compila tutti i campi: Reparto, Dottore, Data, Orario e Dati Paziente.");
                 return;
             }
 
-            // CHIAMATA AL MODELLO (Simulata come nella vecchia classe)
-            System.out.println("Chiamata al Service Prenotazione: " + dottore + " il " + data);
+            // 3. Logica Gestione Paziente (Ricerca o Creazione)
+            PazienteDao pazienteDao = new PazienteDao();
+            List<Paziente> listaPazienti = pazienteDao.getAll();
+            Paziente pazienteScelto = null;
 
-            mostraSuccesso("Visita prenotata con successo per il " + data);
+            // Cerchiamo se esiste già un paziente con questo Nome e Cognome
+            for (Paziente p : listaPazienti) {
+                if (p.getNome().equalsIgnoreCase(nomeInput) && p.getCognome().equalsIgnoreCase(cognomeInput)) {
+                    pazienteScelto = p;
+                    break;
+                }
+            }
+
+            if (pazienteScelto == null) {
+                // Utente non trovato -> Lo creiamo al volo
+                pazienteScelto = new Paziente();
+                pazienteScelto.setNome(nomeInput);
+                pazienteScelto.setCognome(cognomeInput);
+
+                // Impostiamo dati "placeholder" necessari per il database
+                pazienteScelto.setDataNascita("0000-00-00"); // Formato richiesto YYYY-MM-DD
+                pazienteScelto.setIndirizzo("(Prenotazione rapida)");
+
+                // Generiamo un CF temporaneo univoco per evitare errori di vincolo UNIQUE nel DB
+                String cfTemporaneo = "TEMP" + System.currentTimeMillis();
+                // Tagliamo se troppo lungo (il DB potrebbe avere limiti, ma qui siamo sicuri dell'univocità)
+                if (cfTemporaneo.length() > 16) cfTemporaneo = cfTemporaneo.substring(0, 16);
+                pazienteScelto.setCodiceFiscale(cfTemporaneo);
+
+                // Salviamo nel DB: questo metodo popolerà automaticamente l'ID dentro l'oggetto pazienteScelto
+                pazienteDao.save(pazienteScelto);
+                System.out.println("Nuovo paziente creato con ID: " + pazienteScelto.getIdUtente());
+            } else {
+                System.out.println("Paziente esistente trovato: " + pazienteScelto.getNome() + " (ID: " + pazienteScelto.getIdUtente() + ")");
+            }
+
+            // 4. Creazione del Ticket usando l'ID del paziente (recuperato o appena creato)
+            // Usiamo "Bianco" come colore di default per le prenotazioni esterne, o "Visita" se preferisci
+            Ticket nuovoTicket = ticketService.creaTicket("vista", 1, motivo, pazienteScelto.getIdUtente());
+
+            if (erroreLabel != null) erroreLabel.setVisible(false);
+
+            // Feedback utente
+            mostraSuccesso("Visita prenotata con successo per il " + data + "\nTicket #" + nuovoTicket.getIdTicket() + " creato.");
             vaiAdAccessoUtente(actionEvent);
 
         } catch (Exception e) {
-            mostraErrore("Errore prenotazione: " + e.getMessage());
+            mostraErrore("Errore durante la prenotazione: " + e.getMessage());
             e.printStackTrace();
         }
     }

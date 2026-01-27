@@ -8,15 +8,15 @@ public class dbPopolate {
 
     public static void popolaDatabase() {
         String[] sqlStatements = {
-                // 1. PULIZIA (Opzionale: rimuove i dati vecchi per ripartire da zero)
-                /*"DELETE FROM referto;",
+                // 1. PULIZIA (Opzionale: rimuove i dati vecchi per ripartire da zero
+                "DELETE FROM referto;",
                 "DELETE FROM visita;",
                 "DELETE FROM ticket;",
                 "DELETE FROM segretario;",
                 "DELETE FROM dottore;",
                 "DELETE FROM paziente;",
                 "DELETE FROM utente;",
-                "DELETE FROM reparto;",*/
+                "DELETE FROM reparto;",
 
                 // 2. INSERIMENTO REPARTI
                 "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (1, 'Cardiologia', 'CARD', 10);",
@@ -24,6 +24,8 @@ public class dbPopolate {
                 "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (3, 'Chirurgia Generale', 'CHIR', 5);",
                 "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (4, 'Medicina Interna', 'MED', 12);",
                 "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (5, 'Neurologia', 'NEURO', 6);",
+                // Medicina Generale
+                "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (6, 'Medicina Generale', 'GEN', 20);",
 
                 // 3. INSERIMENTO SEGRETARIO (Login ID: 100)
                 "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (100, 'Giulia', 'Admin', '1990-05-20', 'SEGRETARIO');",
@@ -43,12 +45,16 @@ public class dbPopolate {
                 "INSERT INTO dottore (idUtente, matricola, turni, idReparto) VALUES (3, 'DOC003', 'Notte', 3);",
 
                 // Dottore 4 - Medicina Interna
-                "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (4, 'Gregory', 'House', '1965-01-01', 'DOC004', 'H24', 4);",
+                "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (4, 'Gregory', 'House', '1965-01-01', 'DOTTORE');",
                 "INSERT INTO dottore (idUtente, matricola, turni, idReparto) VALUES (4, 'DOC004', 'H24', 4);",
 
                 // Dottore 5 - Neurologia
-                "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (5, 'Stephen', 'Strange', '1976-10-10', 'DOC005', 'Reperibile', 5);",
+                "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (5, 'Stephen', 'Strange', '1976-10-10', 'DOTTORE');",
                 "INSERT INTO dottore (idUtente, matricola, turni, idReparto) VALUES (5, 'DOC005', 'Reperibile', 5);",
+
+                // ID: 6 - Dottore Generale
+                "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (6, 'Dottore', 'Generale', '1980-01-01', 'DOTTORE');",
+                "INSERT INTO dottore (idUtente, matricola, turni, idReparto) VALUES (6, 'DOC-GEN', 'H24', 6);",
 
                 // 5. INSERIMENTO PAZIENTI
                 "INSERT INTO utente (idUtente, nome, cognome, dataNascita, tipoUtente) VALUES (10, 'Luigi', 'Paziente', '1995-02-15', 'PAZIENTE');",
@@ -66,7 +72,9 @@ public class dbPopolate {
                 "INSERT INTO ticket (idTicket, colore, priorita, sintomi, stato, timestamp, idPaziente) VALUES (99, 'Rosso', 4, 'Trauma cranico', 'ACCETTATO', '2023-11-01 09:00', 10);",
 
                 // 7. INSERIMENTO VISITE (Per il calendario del Dottore 1)
-                "INSERT INTO visita (dataOraInizio, dataOraFine, sala, idTicket, idDottore, idPaziente, idReparto) VALUES ('2023-11-02 09:00', '2023-11-02 09:30', 'Sala 1', 99, 1, 10, 1);"
+                "INSERT INTO visita (dataOraInizio, dataOraFine, sala, idTicket, idDottore, idPaziente, idReparto) VALUES ('2023-11-02 09:00', '2023-11-02 09:30', 'Sala 1', 99, 1, 10, 1);",
+                // Assegniamo la visita di esempio al nuovo DOTTORE GENERALE (ID 6) e Reparto (ID 6)
+                "INSERT INTO visita (dataOraInizio, dataOraFine, sala, idTicket, idDottore, idPaziente, idReparto) VALUES ('2024-12-02 09:00', '2024-12-02 09:30', 'Ambulatorio 1', 99, 6, 10, 6);"
         };
 
         try (Connection conn = db.connect();
