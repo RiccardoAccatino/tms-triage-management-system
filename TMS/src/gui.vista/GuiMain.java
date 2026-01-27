@@ -34,7 +34,7 @@ public class GuiMain extends Application {
 
     private static Parent loadFXML(String fxml) throws IOException {
         // Carica il file FXML dalla cartella resources/gui/vista
-        FXMLLoader fxmlLoader = new FXMLLoader(GuiMain.class.getResource("/gui.vista/" + fxml + ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(GuiMain.class.getResource("/gui/vista/" + fxml + ".fxml"));
         return fxmlLoader.load();
     }
 
