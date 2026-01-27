@@ -9,14 +9,14 @@ public class dbPopolate {
     public static void popolaDatabase() {
         String[] sqlStatements = {
                 // 1. PULIZIA (Opzionale: rimuove i dati vecchi per ripartire da zero)
-                "DELETE FROM referto;",
+                /*"DELETE FROM referto;",
                 "DELETE FROM visita;",
                 "DELETE FROM ticket;",
                 "DELETE FROM segretario;",
                 "DELETE FROM dottore;",
                 "DELETE FROM paziente;",
                 "DELETE FROM utente;",
-                "DELETE FROM reparto;",
+                "DELETE FROM reparto;",*/
 
                 // 2. INSERIMENTO REPARTI
                 "INSERT INTO reparto (idReparto, nome, codice, sale) VALUES (1, 'Cardiologia', 'CARD', 10);",

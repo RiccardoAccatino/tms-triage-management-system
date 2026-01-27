@@ -1,5 +1,6 @@
 package controller;
 
+import gui.vista.GuiMain;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -7,6 +8,8 @@ import model.CompilazioneTicket;
 import model.CompilazioneTriage;
 import model.pojo.Paziente;
 import model.pojo.Ticket;
+
+import java.io.IOException;
 
 public class TriageController {
 
@@ -21,6 +24,10 @@ public class TriageController {
 
     @FXML
     private DatePicker dataNascitaPicker;
+
+    @FXML
+    private TextField indirizzo;
+
 
     @FXML
     private TextArea sintomiArea;
@@ -49,6 +56,7 @@ public class TriageController {
             paziente.setCognome(cognomeField.getText().trim());
             paziente.setCodiceFiscale(cfField.getText().trim());
             paziente.setDataNascita(dataNascitaPicker.getValue().toString());
+            paziente.setIndirizzo(indirizzo.getText().trim());
 
             // Registrazione o recupero del paziente dal database tramite la classe CompilazioneTriage
             Paziente pazienteRegistrato = compilazioneTriage.gestisciAnagraficaPaziente(paziente);
@@ -81,8 +89,9 @@ public class TriageController {
     }
 
     @FXML
-    private void vaiAdAccessoUtente(ActionEvent event) {
+    private void vaiAdAccessoUtente(ActionEvent event) throws IOException {
         // Logica per ritornare alla schermata precedente o accedere a una nuova schermata.
+        GuiMain.setRoot("PannelloUtente");
         System.out.println("Eseguito il ritorno indietro.");
     }
 
@@ -95,6 +104,7 @@ public class TriageController {
             return 4; // Bassa priorità
         }
     }
+
 
     private String determinaColoreDaPriorita(int priorita) {
         switch (priorita) {
@@ -118,3 +128,5 @@ public class TriageController {
         alert.showAndWait();
     }
 }
+
+

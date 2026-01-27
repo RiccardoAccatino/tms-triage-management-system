@@ -47,6 +47,13 @@
         </VBox>
     </HBox>
 
+    <VBox maxWidth="500.0" spacing="5.0">
+
+            <Label style="-fx-font-weight: bold; -fx-text-fill: #34495e;" text="Indirizzo:" />
+            <TextField fx:id="indirizzo" maxWidth="Infinity" promptText="Residenza / Via / Corso" />
+
+    </VBox>
+
     <VBox maxWidth="500.0" spacing="5.0" />
 
     <Separator prefWidth="500.0" style="-fx-opacity: 0.5;" />
