@@ -1,172 +1,118 @@
 package controller;
 
-import gui.vista.GuiMain;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.CompilazioneTicket;
-import model.PrenotazioneVisitaService;
-import model.Sessione;
+import model.CompilazioneTriage;
 import model.pojo.Paziente;
-
-import java.io.IOException;
-import java.time.LocalDate;
+import model.pojo.Ticket;
 
 public class TriageController {
 
-    // --- CAMPI COMUNI ---
-    @FXML private TextField nomeField, cognomeField;
-    @FXML private Label erroreLabel;
-
-    // --- CAMPI SOLO TRIAGE (Presenti in PannelloTriage.fxml) ---
-    @FXML private TextField cfField;
-    @FXML private DatePicker dataNascitaPicker;
-    @FXML private TextArea sintomiArea;
-    @FXML private ComboBox<String> coloreCombo;
-
-    // --- CAMPI SOLO PRENOTAZIONE (Presenti in PannelloPrenotazioneVisita.fxml) ---
-    @FXML private ComboBox<String> repartoCombo;
-    @FXML private ComboBox<String> dottoreCombo;
-    @FXML private ComboBox<String> orarioCombo;
-    @FXML private DatePicker dataVisitaPicker;
-    @FXML private TextArea motivoArea;
-
-    // --- SERVIZI DEL MODELLO ---
-    private final CompilazioneTicket ticketService = new CompilazioneTicket();
-    private final PrenotazioneVisitaService prenotazioneService = new PrenotazioneVisitaService();
+    @FXML
+    private TextField nomeField;
 
     @FXML
-    public void initialize() {
-        // 1. SETUP SESSIONE (Simulazione se necessario per evitare NullPointer sul Paziente)
-        if (Sessione.getInstance().getUtenteLoggato() == null) {
-            // Rimuovi questo blocco quando avrai il Login funzionante
-            Paziente pFake = new Paziente(1, "Test", "User", "1990-01-01", "CFTEST", "Via Roma");
-            Sessione.getInstance().setUtenteLoggato(pFake);
-        }
+    private TextField cognomeField;
 
-        // 2. SETUP TRIAGE: Eseguito solo se siamo nella schermata di Triage
-        if (coloreCombo != null) {
-            coloreCombo.getItems().addAll("Bianco", "Verde", "Giallo", "Rosso");
-        }
+    @FXML
+    private TextField cfField;
 
-        // 3. SETUP PRENOTAZIONE: Eseguito solo se siamo nella schermata di Prenotazione
-        if (repartoCombo != null) {
-            // TODO: In futuro carica questi dati dal DB usando i DAO (es. RepartoDao)
-            repartoCombo.getItems().addAll("Cardiologia", "Ortopedia", "Chirurgia", "Medicina Generale");
-        }
-        if (dottoreCombo != null) {
-            // TODO: Filtra i dottori in base al reparto selezionato
-            dottoreCombo.getItems().addAll("Dr. Rossi", "Dr.sa Bianchi", "Dr. Verdi");
-        }
-        if (orarioCombo != null) {
-            orarioCombo.getItems().addAll("09:00", "10:00", "11:00", "15:00", "16:30");
-        }
+    @FXML
+    private DatePicker dataNascitaPicker;
 
-        // Nascondi label errore all'avvio
-        if (erroreLabel != null) erroreLabel.setVisible(false);
+    @FXML
+    private TextArea sintomiArea;
+
+    @FXML
+    private ComboBox<Integer> coloreCombo;
+
+    @FXML
+    private Label erroreLabel;
+
+    private final CompilazioneTriage compilazioneTriage = new CompilazioneTriage();
+    private final CompilazioneTicket compilazioneTicket = new CompilazioneTicket();
+
+    // Inizializzazione del ComboBox livelloDolore con i valori accettabili
+    @FXML
+    private void initialize() {
+        coloreCombo.getItems().addAll(1, 2, 3, 4, 5, 6, 7, 8, 9, 10); // Livelli da 1 a 10
     }
 
-    // --- LOGICA TRIAGE (Crea Ticket) ---
     @FXML
-    private void CreaTicket() {
+    private void CreaTicket(ActionEvent event) {
         try {
-            // Validazione Input
-            String sintomi = sintomiArea.getText();
-            String colore = coloreCombo.getValue();
+            // Recupero e validazione dati paziente
+            Paziente paziente = new Paziente();
+            paziente.setNome(nomeField.getText().trim());
+            paziente.setCognome(cognomeField.getText().trim());
+            paziente.setCodiceFiscale(cfField.getText().trim());
+            paziente.setDataNascita(dataNascitaPicker.getValue().toString());
 
-            if (sintomi == null || sintomi.trim().isEmpty() || colore == null) {
-                mostraErrore("Compila tutti i campi del Triage.");
-                return;
+            // Registrazione o recupero del paziente dal database tramite la classe CompilazioneTriage
+            Paziente pazienteRegistrato = compilazioneTriage.gestisciAnagraficaPaziente(paziente);
+
+            // Recupero livello di dolore selezionato
+            Integer livelloDolore = coloreCombo.getValue();
+            if (livelloDolore == null) {
+                throw new IllegalArgumentException("Selezionare un livello di dolore.");
             }
 
-            // Conversione Colore -> Priorità
-            int priorita = switch (colore) {
-                case "Rosso" -> 4;
-                case "Giallo" -> 3;
-                case "Verde" -> 2;
-                default -> 1; // Bianco
-            };
+            // Trasformazione del livello di dolore in priorità e colore
+            int priorita = calcolaPrioritaDaLivelloDolore(livelloDolore);
+            String colore = determinaColoreDaPriorita(priorita);
 
-            // CHIAMATA AL MODELLO
-            ticketService.creaTicket(colore, priorita, sintomi, idPaziente);
-
-            mostraSuccesso("Ticket creato con successo! Codice Colore: " + colore);
-            vaiAdAccessoUtente(null);
-
-        } catch (Exception e) {
-            mostraErrore("Errore creazione ticket: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // --- LOGICA PRENOTAZIONE (Conferma Prenotazione) ---
-    @FXML
-    public void ConfermaPrenotazione(ActionEvent actionEvent) {
-        try {
-            // Recupero Dati
-            String reparto = (repartoCombo != null) ? repartoCombo.getValue() : null;
-            String dottore = (dottoreCombo != null) ? dottoreCombo.getValue() : null;
-            String orario = (orarioCombo != null) ? orarioCombo.getValue() : null;
-            LocalDate data = (dataVisitaPicker != null) ? dataVisitaPicker.getValue() : null;
-            String motivo = (motivoArea != null) ? motivoArea.getText() : "";
-
-            // Validazione Input
-            if (reparto == null || dottore == null || orario == null || data == null) {
-                mostraErrore("Seleziona Reparto, Dottore, Data e Orario.");
-                return;
+            // Recupero i sintomi
+            String sintomi = sintomiArea.getText().trim();
+            if (sintomi.isEmpty()) {
+                throw new IllegalArgumentException("Descrivere i sintomi del paziente.");
             }
 
-            // CHIAMATA AL MODELLO
-            // Nota: Verifica il nome esatto del metodo nel tuo PrenotazioneVisitaService.
-            // Qui assumo un metodo standard 'prenota' o simile.
-            // Se non esiste, dovrai crearlo nel service o adattare questa riga.
+            // Creazione del ticket
+            Ticket nuovoTicket = compilazioneTicket.creaTicket(colore, priorita, sintomi, paziente.getIdUtente());
+            erroreLabel.setVisible(false);
 
-            // Esempio generico di logica di servizio:
-            // prenotazioneService.registraPrenotazione(Sessione.getInstance().getUtenteLoggato(), dottore, data, orario, motivo);
-
-            // Per ora stampiamo a console per simulare il successo se il metodo manca
-            System.out.println("Chiamata al Service Prenotazione: " + dottore + " il " + data);
-
-            mostraSuccesso("Visita prenotata con successo per il " + data);
-            vaiAdAccessoUtente(actionEvent);
-
+            mostraMessaggioSuccesso("Ticket creato con successo! ID: " + nuovoTicket.getIdTicket());
         } catch (Exception e) {
-            mostraErrore("Errore prenotazione: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // --- NAVIGAZIONE E UTILITY ---
-
-    @FXML
-    public void vaiAdAccessoUtente(ActionEvent event) throws IOException {
-        GuiMain.setRoot("PannelloUtente");
-    }
-
-    // Helper per tornare al menu (collegato ad eventuali bottoni "Indietro")
-    @FXML
-    public void TornaAlMenu(ActionEvent actionEvent) throws IOException {
-        vaiAdAccessoUtente(actionEvent);
-    }
-
-    // Metodo helper per mostrare errori nella GUI
-    private void mostraErrore(String messaggio) {
-        if (erroreLabel != null) {
-            erroreLabel.setText(messaggio);
-            erroreLabel.setStyle("-fx-text-fill: red;");
+            erroreLabel.setText(e.getMessage());
             erroreLabel.setVisible(true);
-        } else {
-            // Fallback su console se la label non c'è
-            System.err.println("ERRORE: " + messaggio);
-            Alert alert = new Alert(Alert.AlertType.ERROR, messaggio);
-            alert.show();
         }
     }
 
-    // Metodo helper per messaggi di successo
-    private void mostraSuccesso(String messaggio) {
+    @FXML
+    private void vaiAdAccessoUtente(ActionEvent event) {
+        // Logica per ritornare alla schermata precedente o accedere a una nuova schermata.
+        System.out.println("Eseguito il ritorno indietro.");
+    }
+
+    private int calcolaPrioritaDaLivelloDolore(int livelloDolore) {
+        if (livelloDolore >= 8) {
+            return 2; // Alta priorità
+        } else if (livelloDolore >= 4) {
+            return 3; // Media priorità
+        } else {
+            return 4; // Bassa priorità
+        }
+    }
+
+    private String determinaColoreDaPriorita(int priorita) {
+        switch (priorita) {
+            case 2:
+                return "Arancione"; // Colore arancione per alta priorità
+            case 3:
+                return "Verde";     // Colore verde per media priorità
+            case 4:
+                return "Bianco";    // Colore bianco per bassa priorità
+            default:
+                throw new IllegalArgumentException("Priorità non valida.");
+        }
+    }
+
+    private void mostraMessaggioSuccesso(String messaggio) {
+        // Mostra un messaggio di successo all'utente per la creazione del ticket
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Operazione Completata");
+        alert.setTitle("Successo");
         alert.setHeaderText(null);
         alert.setContentText(messaggio);
         alert.showAndWait();

@@ -15,8 +15,9 @@ public class GuiMain extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        // 1. Inizializziamo il Database (crea le tabelle se non esistono)
+        // 1. Inizializziamo il Database e lo popoliamo(crea le tabelle se non esistono)
         db.initializeDb();
+        dbManager.dbPopolate.popolaDatabase();
 
         // 2. Carichiamo la schermata iniziale (Menu Principale)
         scene = new Scene(loadFXML("PannelloUtente"), 800, 600);
