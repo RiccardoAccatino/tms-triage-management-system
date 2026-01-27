@@ -57,7 +57,7 @@ class PrenotazioneVisitaTest {
         // Verifichiamo che la lista non sia vuota e che l'ultimo ticket inserito sia "In Attesa"
         assertFalse(tuttiITicket.isEmpty(), "Il database dovrebbe contenere almeno un ticket");
 
-        Ticket ultimoTicket = tuttiITicket.getLast();
+        Ticket ultimoTicket = tuttiITicket.get(tuttiITicket.size() - 1);
         assertEquals("In Attesa", ultimoTicket.getStato(), "Il ticket nel DB deve avere stato 'In Attesa'");
         assertEquals(richiesta.getIdPaziente(), ultimoTicket.getIdPaziente(), "L'ID paziente nel DB deve coincidere");
     }
