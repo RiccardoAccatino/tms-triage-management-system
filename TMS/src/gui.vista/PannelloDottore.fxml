@@ -26,8 +26,10 @@
 
         <Button maxWidth="Infinity" onAction="#VisualizzaCalendario" prefHeight="60.0" style="-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Il Mio Calendario" />
 
-        <Button maxWidth="Infinity" onAction="#CreaNuovoTicket" prefHeight="60.0" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Emetti Nuovo Ticket" />
+        <Button maxWidth="Infinity" onAction="#CreaNuovoTicketDottore" prefHeight="60.0" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="(RF10)" />
 
+        <Button maxWidth="Infinity" onAction="#EffettuaLogout" prefHeight="60.0" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;"
+                text="Logout" />
     </VBox>
 
 </VBox>

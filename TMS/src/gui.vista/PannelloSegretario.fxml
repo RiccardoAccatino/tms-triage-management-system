@@ -30,6 +30,8 @@
 
         <Button maxWidth="Infinity" onAction="#CreaNuovoTicket" prefHeight="60.0" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Crea Nuovo Ticket" />
 
+        <Button maxWidth="Infinity" onAction="#EffettuaLogout" prefHeight="60.0" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;"
+                text="Logout" />
     </VBox>
 
 </VBox>

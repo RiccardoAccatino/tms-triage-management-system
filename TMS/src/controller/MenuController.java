@@ -59,6 +59,17 @@ public class MenuController {
     }
 
     @FXML
+    public void EffettuaLogout(ActionEvent actionEvent) {
+        // 1. Resetta l'utente loggato nella sessione
+        Sessione.getInstance().logout();
+
+        System.out.println("Logout effettuato con successo.");
+
+        // 2. Torna alla schermata principale (Login)
+        navigaVerso("PannelloUtente");
+    }
+
+    @FXML
     public void TornaAlMenu(ActionEvent actionEvent) {
         // Controlla chi è loggato per tornare al menu corretto
         if (Sessione.getInstance().isDottore()) {
@@ -122,5 +133,9 @@ public class MenuController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    public void CreaNuovoTicketDottore(ActionEvent actionEvent) {
+        //non da implementare RF10
     }
 }

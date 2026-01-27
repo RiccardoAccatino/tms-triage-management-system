@@ -13,7 +13,7 @@ public class VisitaDao implements Dao<Visita> {
     @Override
     public List<Visita> getAll() {
         List<Visita> visite = new ArrayList<>();
-        String sql = "SELECT * FROM visita";
+        String sql = "SELECT * FROM visita ";
         try (Connection conn = db.connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
