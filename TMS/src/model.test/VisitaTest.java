@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test Suite per la gestione delle Visite.
  * Questo test è il più completo perché la Visita collega tutte le altre entità:
  * Ticket, Dottore, Paziente e Reparto.
+ *
+ * @author angie
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VisitaTest {

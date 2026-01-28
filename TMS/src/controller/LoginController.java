@@ -21,7 +21,7 @@ public class LoginController {
         try {
             String idText = txtIdStaff.getText();
             if (idText.isEmpty()) {
-                mostraErrore("Inserisci un ID.");
+                mostraErrore("Inserisci un ID per accedere");
                 return;
             }
 

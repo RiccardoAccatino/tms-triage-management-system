@@ -128,5 +128,3 @@ public class TriageController {
         alert.showAndWait();
     }
 }
-
-

@@ -5,6 +5,9 @@ import model.pojo.Ticket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ *  @author DAPPIANO FRANCESCO
+ */
 public class CompilazioneTicket {
 
     private TicketDao ticketDao;

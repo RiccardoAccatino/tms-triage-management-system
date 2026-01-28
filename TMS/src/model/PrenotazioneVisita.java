@@ -4,7 +4,7 @@ package model;
  * RF1 - Prenotazione visita
  * L’utente esterno deve poter prenotare le visite con i dottori
  *
- * @author angie albitres
+ * @author angie
  */
 public class PrenotazioneVisita {
     private int idPaziente;
@@ -24,6 +24,7 @@ public class PrenotazioneVisita {
         this.stato = "In Attesa";
     }
 
+    // Getters e Setters
     public String getDataOraRichiesta() {
         return dataOraRichiesta;
     }

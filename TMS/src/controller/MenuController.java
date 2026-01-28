@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class MenuController {
-
-    // Riferimento alla ListView presente in PannelloCalendario.fxml
     @FXML
     private ListView<String> listaAppuntamenti;
 

@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author angie riccardo
+ */
 public class VisitaDao implements Dao<Visita> {
 
     @Override
@@ -35,6 +38,9 @@ public class VisitaDao implements Dao<Visita> {
         return visite;
     }
 
+    /**
+     * Recupera tutte le visite
+     */
     @Override
     public Visita get(int id) {
         String sql = "SELECT * FROM visita WHERE idVisita = ?";
@@ -60,6 +66,9 @@ public class VisitaDao implements Dao<Visita> {
         return null;
     }
 
+    /**
+     * Salva la visita nel DB
+     */
     @Override
     public void save(Visita visita) {
         String sql = "INSERT INTO visita(dataOraInizio, dataOraFine, sala, idTicket, idDottore, idPaziente, idReparto) VALUES(?,?,?,?,?,?,?)";
@@ -83,6 +92,7 @@ public class VisitaDao implements Dao<Visita> {
             throw new VisitaException("Errore salvataggio visita: " + e.getMessage());
         }
     }
+
 
     @Override
     public void update(Visita visita) {

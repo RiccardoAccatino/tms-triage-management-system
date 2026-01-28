@@ -36,7 +36,7 @@
         <Button maxWidth="Infinity" onAction="#VaiATriage" prefHeight="60.0" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Accettazione Triage" />
 
     </VBox>
-<!-- parte da qua-->
+
     <VBox alignment="CENTER" maxWidth="400.0" spacing="15.0">
         <Separator>
             <VBox.margin>

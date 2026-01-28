@@ -1,14 +1,18 @@
 package model;
 
+import model.dao.DottoreDao;
 import model.dao.TicketDao;
 import model.pojo.Ticket;
 import model.exception.TicketException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// RF5 (20055270)
+/**
+ *  @author DAPPIANO FRANCESCO
+ */
 public class accRifTicket {
     private final TicketDao ticketDao;
+    private DottoreDao visitaDao;
 
     public accRifTicket() {
         this.ticketDao = new TicketDao();
@@ -57,6 +61,7 @@ public class accRifTicket {
 
         } else {
             ticket.setStato("RIFIUTATO");
+
         }
 
         try {

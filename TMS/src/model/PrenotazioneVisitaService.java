@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Service per la gestione della logica di business legata a RF1.
  *
- * @author angie albitres
+ * @author angie
  */
 public class PrenotazioneVisitaService {
     private final TicketDao ticketDao;
@@ -27,7 +27,7 @@ public class PrenotazioneVisitaService {
      */
     public boolean registraPrenotazioneDiretta(PrenotazioneVisita richiesta) {
         try {
-            // --- 1. CREAZIONE TICKET (Già Accettato) ---
+            // --- CREAZIONE TICKET (gia accettato)---
             Ticket nuovoTicket = new Ticket();
             nuovoTicket.setIdPaziente(richiesta.getIdPaziente());
             nuovoTicket.setColore("Verde"); // Priorità standard per prenotazioni
@@ -46,7 +46,7 @@ public class PrenotazioneVisitaService {
             ticketDao.save(nuovoTicket);
             int idTicketGenerato = nuovoTicket.getIdTicket();
 
-            // --- 2. CREAZIONE VISITA ---
+            // --- CREAZIONE VISITA ---
             Visita nuovaVisita = new Visita();
             nuovaVisita.setIdTicket(idTicketGenerato);
             nuovaVisita.setIdPaziente(richiesta.getIdPaziente());
@@ -54,11 +54,9 @@ public class PrenotazioneVisitaService {
             nuovaVisita.setIdReparto(richiesta.getIdReparto());
 
             // Impostiamo Data e Ora scelte dal paziente
-            // (La richiesta.getDataOraRichiesta() deve essere nel formato "yyyy-MM-dd HH:mm")
             nuovaVisita.setDataOraInizio(richiesta.getDataOraRichiesta());
 
-            // Calcoliamo una data fine fittizia (es. +30 minuti) per completezza DB
-            // Nota: Qui facciamo un parsing semplice, assicurati che la stringa sia corretta
+            // Calcoliamo una data fine fittizia (es. +30 minuti)
             try {
                 LocalDateTime inizio = LocalDateTime.parse(richiesta.getDataOraRichiesta(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 LocalDateTime fine = inizio.plusMinutes(30);

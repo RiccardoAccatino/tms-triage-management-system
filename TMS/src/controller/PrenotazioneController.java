@@ -10,10 +10,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import model.*;
-import model.dao.DottoreDao; // Importante
-import model.dao.PazienteDao;
-import model.dao.TicketDao;  // Importante
-import model.dao.VisitaDao;  // Importante
+import model.dao.*;
+import model.pojo.Reparto;
 import model.pojo.Dottore;
 import model.pojo.Paziente;
 import model.pojo.Ticket;
@@ -31,8 +29,8 @@ public class PrenotazioneController {
     @FXML private Label erroreLabel;
 
     // --- CAMPI SOLO PRENOTAZIONE ---
-    @FXML private ComboBox<String> repartoCombo;
-    @FXML private ComboBox<String> dottoreCombo;
+    @FXML private ComboBox<Reparto> repartoCombo;
+    @FXML private ComboBox<Dottore> dottoreCombo;
     @FXML private ComboBox<String> orarioCombo;
     @FXML private DatePicker dataVisitaPicker;
     @FXML private TextArea motivoArea;
@@ -43,23 +41,48 @@ public class PrenotazioneController {
     // --- SERVIZI ---
     private final PrenotazioneVisitaService prenotazioneService = new PrenotazioneVisitaService();
     private final accRifTicket accettazioneService = new accRifTicket();
-    // Nota: usiamo accettazioneService solo per leggere la lista, la logica di scrittura è ora qui sotto.
 
     @FXML
     public void initialize() {
-        if (Sessione.getInstance().getUtenteLoggato() == null) {
-            Paziente pFake = new Paziente(1, "Test", "User", "1990-01-01", "0000000000000000", "Via Roma");
-            Sessione.getInstance().setUtenteLoggato(pFake);
+        DottoreDao dottoreDao = new DottoreDao();
+        RepartoDao repartoDao = new RepartoDao();
+
+        if (repartoCombo != null) {
+            repartoCombo.getItems().addAll(repartoDao.getAll());
+            repartoCombo.setConverter(new StringConverter<Reparto>() {
+                @Override
+                public String toString(Reparto r) {
+                    return (r != null) ? r.getNome() : " ";
+                }
+
+                @Override
+                public Reparto fromString(String s) {
+                    return null;
+                }
+            });
         }
 
-        //++++++++++++ FARE IL ARICAMENTO DA DB +++++++++++++++++++
-        if (repartoCombo != null) repartoCombo.getItems().addAll("Cardiologia", "Ortopedia", "Chirurgia", "Medicina Generale");
-        if (dottoreCombo != null) dottoreCombo.getItems().addAll("Dr. Rossi", "Dr.sa Bianchi", "Dr. Verdi");
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        if (dottoreCombo != null) {
+            dottoreCombo.getItems().addAll(dottoreDao.getAll());
+            dottoreCombo.setConverter(new StringConverter<Dottore>() {
+                @Override
+                public String toString(Dottore d) {
+                    return (d != null) ? d.getNome() + " " + d.getCognome() : "";
+                }
+                @Override
+                public Dottore fromString(String s) {
+                    return null;
+                }
+            });
+        }
 
 
-        // fargli uguali al popup del segretario
-        if (orarioCombo != null) orarioCombo.getItems().addAll("09:00", "10:00", "11:00", "15:00", "16:30");
+        if (orarioCombo != null) {
+            orarioCombo.getItems().addAll("08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+                    "11:00", "11:30", "12:00", "14:00", "14:30", "15:00",
+                    "15:30", "16:00", "16:30", "17:00");
+            orarioCombo.getSelectionModel().selectFirst();
+        }
 
         if (ticketsContainer != null) {
             caricaTicketsDalDb();
@@ -69,7 +92,6 @@ public class PrenotazioneController {
     }
 
     // --- GESTIONE LISTA TICKET ---
-
     private void caricaTicketsDalDb() {
         if (ticketsContainer == null) return;
         ticketsContainer.getChildren().clear();
@@ -115,8 +137,8 @@ public class PrenotazioneController {
 
         Button btnRifiuta = new Button("Rifiuta");
         btnRifiuta.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-cursor: hand;");
-        // Qui chiamiamo direttamente il rifiuto
         btnRifiuta.setOnAction(e -> rifiutaTicketDiretto(t.getIdTicket()));
+
 
         card.getChildren().addAll(info, btnAccetta, btnRifiuta);
         return card;
@@ -128,6 +150,8 @@ public class PrenotazioneController {
      * Mostra il dialog e gestisce INTERAMENTE la logica di salvataggio
      * (Update Ticket + Insert Visita) senza passare dal Service.
      */
+
+
     private void mostraDialogAssegnazione(int idTicket) {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("Assegnazione Visita");
@@ -180,18 +204,17 @@ public class PrenotazioneController {
                 return;
             }
 
-            // --- INIZIO LOGICA DI BUSINESS DIRETTA ---
             try {
                 // 1. Instanziamo i DAO necessari
                 TicketDao ticketDao = new TicketDao();
                 VisitaDao visitaDao = new VisitaDao();
+                accRifTicket accettazione = new accRifTicket();
 
                 // 2. Aggiorniamo il Ticket
                 Ticket ticket = ticketDao.get(idTicket);
-                if (ticket != null) {
-                    ticket.setStato("ACCETTATO");
-                    ticketDao.update(ticket);
-                }
+
+                accettazione.valutaTicket(idTicket,true);
+
 
                 // 3. Creiamo la Visita
                 Visita nuovaVisita = new Visita();
@@ -220,26 +243,24 @@ public class PrenotazioneController {
     }
 
     private void rifiutaTicketDiretto(int idTicket) {
+        accRifTicket accettazione = new accRifTicket();;
         try {
-            TicketDao ticketDao = new TicketDao();
-            Ticket ticket = ticketDao.get(idTicket);
-            if (ticket != null) {
-                ticket.setStato("RIFIUTATO");
-                ticketDao.update(ticket);
-                mostraSuccesso("Ticket rifiutato.");
+                accettazione.valutaTicket(idTicket,false);
                 caricaTicketsDalDb();
-            }
+
         } catch (Exception e) {
             mostraErrore("Errore: " + e.getMessage());
         }
     }
 
-    // --- ALTRE FUNZIONI ESISTENTI (PRENOTAZIONE) ---
+
+
+    // --- PRENOTAZIONE ---
     @FXML
     public void ConfermaPrenotazione(ActionEvent actionEvent) {
         try {
-            String nomeReparto = (repartoCombo != null) ? repartoCombo.getValue() : null;
-            String nomeDottore = (dottoreCombo != null) ? dottoreCombo.getValue() : null;
+            String nomeReparto = (repartoCombo != null) ? String.valueOf(repartoCombo.getValue()) : null;
+            String nomeDottore = (dottoreCombo != null) ? String.valueOf(dottoreCombo.getValue()) : null;
             String orario = (orarioCombo != null) ? orarioCombo.getValue() : null;
             LocalDate data = (dataVisitaPicker != null) ? dataVisitaPicker.getValue() : null;
             String motivo = (motivoArea != null) ? motivoArea.getText() : "";
@@ -261,7 +282,7 @@ public class PrenotazioneController {
             }
 
             if (pazienteScelto == null) {
-                pazienteScelto = new Paziente(0, nomeInput, cognomeInput, "1990-01-01", "CF-TEMP-" + System.currentTimeMillis(), "Indirizzo Temp");
+                pazienteScelto = new Paziente(0, nomeInput, cognomeInput, "0000-00-00", "CF-TEMP-" + System.currentTimeMillis(), "Indirizzo Temp");
                 pazienteDao.save(pazienteScelto);
             }
 
