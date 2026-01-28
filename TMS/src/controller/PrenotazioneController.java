@@ -22,6 +22,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @author Angie Albitres & Riccardo Accatino
+ */
 public class PrenotazioneController {
 
     // --- CAMPI COMUNI ---
@@ -132,7 +135,7 @@ public class PrenotazioneController {
 
         Button btnAccetta = new Button("Accetta");
         btnAccetta.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-cursor: hand;");
-        // Qui chiamiamo il metodo che apre il dialog
+
         btnAccetta.setOnAction(e -> mostraDialogAssegnazione(t.getIdTicket()));
 
         Button btnRifiuta = new Button("Rifiuta");
@@ -144,12 +147,6 @@ public class PrenotazioneController {
         return card;
     }
 
-    // --- LOGICA "COLLASSATA" NEL CONTROLLER ---
-
-    /**
-     * Mostra il dialog e gestisce INTERAMENTE la logica di salvataggio
-     * (Update Ticket + Insert Visita) senza passare dal Service.
-     */
 
 
     private void mostraDialogAssegnazione(int idTicket) {
@@ -165,7 +162,7 @@ public class PrenotazioneController {
         grid.setVgap(10);
         grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
 
-        // Setup Dottori
+        // Setup Dottori per recuperarli dal DB
         ComboBox<Dottore> comboDottori = new ComboBox<>();
         DottoreDao dottoreDao = new DottoreDao();
         comboDottori.getItems().addAll(dottoreDao.getAll());
@@ -205,35 +202,30 @@ public class PrenotazioneController {
             }
 
             try {
-                // 1. Instanziamo i DAO necessari
+
                 TicketDao ticketDao = new TicketDao();
                 VisitaDao visitaDao = new VisitaDao();
                 accRifTicket accettazione = new accRifTicket();
 
-                // 2. Aggiorniamo il Ticket
                 Ticket ticket = ticketDao.get(idTicket);
 
                 accettazione.valutaTicket(idTicket,true);
-
-
-                // 3. Creiamo la Visita
                 Visita nuovaVisita = new Visita();
                 nuovaVisita.setIdTicket(idTicket);
-                // Attenzione: se ticket è null qui crasherebbe, ma assumiamo esista
+
                 nuovaVisita.setIdPaziente(ticket.getIdPaziente());
                 nuovaVisita.setIdDottore(docScelto.getIdUtente());
                 nuovaVisita.setIdReparto(docScelto.getIdReparto());
 
-                String dataOra = LocalDate.now().toString() + " " + oraScelta;
+                String dataOra = LocalDate.now() + " " + oraScelta;
                 nuovaVisita.setDataOraInizio(dataOra);
-                nuovaVisita.setDataOraFine(dataOra); // Per semplicità
+                nuovaVisita.setDataOraFine(dataOra);
                 nuovaVisita.setSala("Ambulatorio " + docScelto.getIdReparto());
 
                 visitaDao.save(nuovaVisita);
-                // --- FINE LOGICA DI BUSINESS DIRETTA ---
 
                 mostraSuccesso("Ticket Accettato e Visita creata con successo!");
-                caricaTicketsDalDb(); // Refresh UI
+                caricaTicketsDalDb();
 
             } catch (Exception e) {
                 mostraErrore("Errore DB: " + e.getMessage());
@@ -243,7 +235,7 @@ public class PrenotazioneController {
     }
 
     private void rifiutaTicketDiretto(int idTicket) {
-        accRifTicket accettazione = new accRifTicket();;
+        accRifTicket accettazione = new accRifTicket();
         try {
                 accettazione.valutaTicket(idTicket,false);
                 caricaTicketsDalDb();
@@ -253,65 +245,68 @@ public class PrenotazioneController {
         }
     }
 
-
-
-    // --- PRENOTAZIONE ---
-    @FXML
     public void ConfermaPrenotazione(ActionEvent actionEvent) {
         try {
-            String nomeReparto = (repartoCombo != null) ? String.valueOf(repartoCombo.getValue()) : null;
-            String nomeDottore = (dottoreCombo != null) ? String.valueOf(dottoreCombo.getValue()) : null;
-            String orario = (orarioCombo != null) ? orarioCombo.getValue() : null;
-            LocalDate data = (dataVisitaPicker != null) ? dataVisitaPicker.getValue() : null;
-            String motivo = (motivoArea != null) ? motivoArea.getText() : "";
-            String nomeInput = nomeField.getText().trim();
-            String cognomeInput = cognomeField.getText().trim();
-
-            if (nomeReparto == null || nomeDottore == null || orario == null || data == null || nomeInput.isEmpty() || cognomeInput.isEmpty()) {
-                mostraErrore("Compila tutti i campi per prenotare la visita.");
+            // Validazione Input
+            if (repartoCombo.getValue() == null || dottoreCombo.getValue() == null ||
+                    dataVisitaPicker.getValue() == null || orarioCombo.getValue() == null ||
+                    nomeField.getText().isEmpty() || cognomeField.getText().isEmpty()) {
+                mostraErrore("Compila tutti i campi!");
                 return;
             }
 
-            PazienteDao pazienteDao = new PazienteDao();
-            Paziente pazienteScelto = null;
-            for (Paziente p : pazienteDao.getAll()) {
-                if (p.getNome().equalsIgnoreCase(nomeInput) && p.getCognome().equalsIgnoreCase(cognomeInput)) {
-                    pazienteScelto = p;
-                    break;
-                }
-            }
-
-            if (pazienteScelto == null) {
-                pazienteScelto = new Paziente(0, nomeInput, cognomeInput, "0000-00-00", "CF-TEMP-" + System.currentTimeMillis(), "Indirizzo Temp");
-                pazienteDao.save(pazienteScelto);
-            }
-
+            // Recupero Dati Veri (Niente più "if nome contiene Bianchi")
+            Reparto reparto = repartoCombo.getValue();
+            Dottore dottore = dottoreCombo.getValue();
+            LocalDate data = dataVisitaPicker.getValue();
+            String orario = orarioCombo.getValue();
             String dataOraString = data.toString() + " " + orario;
-            int idDottore = 1;
-            int idReparto = 1;
-            if(nomeDottore.contains("Bianchi")) idDottore = 2;
-            if(nomeReparto.contains("Ortopedia")) idReparto = 2;
 
+            // Gestione Paziente (Meglio se usassi il Codice Fiscale!)
+            PazienteDao pazienteDao = new PazienteDao();
+            Paziente pazienteScelto = trovaOCreaPaziente(pazienteDao);
+
+            // Creazione Prenotazione
             PrenotazioneVisita richiesta = new PrenotazioneVisita(
-                    pazienteScelto.getIdUtente(), idDottore, idReparto, dataOraString, motivo
+                    pazienteScelto.getIdUtente(),
+                    dottore.getIdUtente(),
+                    reparto.getIdReparto(),
+                    dataOraString,
+                    motivoArea.getText()
             );
 
-            boolean esito = prenotazioneService.registraPrenotazioneDiretta(richiesta);
-
-            if (esito) {
-                mostraSuccesso("Visita confermata!\nStato: ACCETTATO\nData: " + dataOraString);
-                vaiAdAccessoUtente(actionEvent);
+            // Salvataggio tramite Service
+            if (prenotazioneService.registraPrenotazioneDiretta(richiesta)) {
+                mostraSuccesso("Prenotazione confermata per il " + dataOraString);
+                this.vaiAdAccessoUtente(actionEvent);
             } else {
-                mostraErrore("Errore tecnico durante il salvataggio della visita.");
+                mostraErrore("Errore nel salvataggio.");
             }
 
         } catch (Exception e) {
-            mostraErrore("Errore imprevisto: " + e.getMessage());
             e.printStackTrace();
+            mostraErrore("Errore imprevisto: " + e.getMessage());
         }
     }
 
-    // --- NAVIGAZIONE E UTILITY ---
+    private Paziente trovaOCreaPaziente(PazienteDao dao) {
+        String nome = nomeField.getText().trim();
+        String cognome = cognomeField.getText().trim();
+
+        // ATTENZIONE: Qui dovresti cercare per CF.
+        // Se non hai il campo CF, questa logica è "debole" ma funzionale per il prototipo.
+        for (Paziente p : dao.getAll()) {
+            if (p.getNome().equalsIgnoreCase(nome) && p.getCognome().equalsIgnoreCase(cognome)) {
+                return p;
+            }
+        }
+
+        // Se non esiste, lo creiamo al volo
+        Paziente nuovo = new Paziente(0, nome, cognome, "1900-01-01", "TEMP-" + System.currentTimeMillis(), "Non specificato");
+        dao.save(nuovo);
+        return nuovo;
+    }
+
     @FXML
     public void vaiAdAccessoUtente(ActionEvent event) throws IOException {
         GuiMain.setRoot("PannelloUtente");

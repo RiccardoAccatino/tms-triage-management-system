@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Questo test è il più completo perché la Visita collega tutte le altre entità:
  * Ticket, Dottore, Paziente e Reparto.
  *
- * @author angie
+ * @author angie albitres & riccardo accatino
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class VisitaTest {

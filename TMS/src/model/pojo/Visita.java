@@ -1,7 +1,7 @@
 package model.pojo;
 
 /**
- * @author angie
+ * @author Angie & Accatino Riccardo
  */
 public class Visita {
     private int idVisita;
@@ -24,7 +24,6 @@ public class Visita {
         this.idPaziente = idPaziente;
         this.idReparto = idReparto;
     }
-
 
     public Visita(){
         this(0, "", "", "", 0, 0, 0, 0);

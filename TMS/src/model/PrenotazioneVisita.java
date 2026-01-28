@@ -4,7 +4,7 @@ package model;
  * RF1 - Prenotazione visita
  * L’utente esterno deve poter prenotare le visite con i dottori
  *
- * @author angie
+ * @author angie albitres
  */
 public class PrenotazioneVisita {
     private int idPaziente;

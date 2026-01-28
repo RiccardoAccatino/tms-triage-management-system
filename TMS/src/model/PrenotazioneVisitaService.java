@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Service per la gestione della logica di business legata a RF1.
  *
- * @author angie
+ * @author angie albitres
  */
 public class PrenotazioneVisitaService {
     private final TicketDao ticketDao;

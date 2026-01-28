@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test Aggiornato per RF1 - Prenotazione Visite Diretta
  * Verifica che la prenotazione crei un Ticket ACCETTATO e una VISITA.
  *
- * @author angie
+ * @author angie albitres
  */
 class PrenotazioneVisitaTest {
 

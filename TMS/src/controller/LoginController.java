@@ -28,7 +28,7 @@ public class LoginController {
             int id = Integer.parseInt(idText);
 
             if (loginService.login(id)) {
-                // Reindirizzamento in base al ruolo
+
                 if (Sessione.getInstance().isDottore()) {
                     GuiMain.setRoot("PannelloDottore");
                 } else if (Sessione.getInstance().isSegretario()) {

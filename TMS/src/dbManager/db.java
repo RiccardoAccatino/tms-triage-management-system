@@ -47,7 +47,7 @@ public class db {
             stmt.execute(sqlReferto);
             System.out.println("Tabelle del database inizializzate con successo");
         } catch (SQLException e) {
-            e.printStackTrace(); // Importante per il debug
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

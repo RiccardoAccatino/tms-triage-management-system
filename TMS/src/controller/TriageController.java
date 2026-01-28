@@ -50,7 +50,6 @@ public class TriageController {
     @FXML
     private void CreaTicket(ActionEvent event) {
         try {
-            // Recupero e validazione dati paziente
             Paziente paziente = new Paziente();
             paziente.setNome(nomeField.getText().trim());
             paziente.setCognome(cognomeField.getText().trim());
@@ -58,26 +57,21 @@ public class TriageController {
             paziente.setDataNascita(dataNascitaPicker.getValue().toString());
             paziente.setIndirizzo(indirizzo.getText().trim());
 
-            // Registrazione o recupero del paziente dal database tramite la classe CompilazioneTriage
             Paziente pazienteRegistrato = compilazioneTriage.gestisciAnagraficaPaziente(paziente);
 
-            // Recupero livello di dolore selezionato
             Integer livelloDolore = coloreCombo.getValue();
             if (livelloDolore == null) {
                 throw new IllegalArgumentException("Selezionare un livello di dolore.");
             }
 
-            // Trasformazione del livello di dolore in priorità e colore
             int priorita = calcolaPrioritaDaLivelloDolore(livelloDolore);
             String colore = determinaColoreDaPriorita(priorita);
 
-            // Recupero i sintomi
             String sintomi = sintomiArea.getText().trim();
             if (sintomi.isEmpty()) {
                 throw new IllegalArgumentException("Descrivere i sintomi del paziente.");
             }
 
-            // Creazione del ticket
             Ticket nuovoTicket = compilazioneTicket.creaTicket(colore, priorita, sintomi, paziente.getIdUtente());
             erroreLabel.setVisible(false);
 
@@ -90,18 +84,17 @@ public class TriageController {
 
     @FXML
     private void vaiAdAccessoUtente(ActionEvent event) throws IOException {
-        // Logica per ritornare alla schermata precedente o accedere a una nuova schermata.
         GuiMain.setRoot("PannelloUtente");
         System.out.println("Eseguito il ritorno indietro.");
     }
 
     private int calcolaPrioritaDaLivelloDolore(int livelloDolore) {
         if (livelloDolore >= 8) {
-            return 2; // Alta priorità
+            return 2;
         } else if (livelloDolore >= 4) {
-            return 3; // Media priorità
+            return 3;
         } else {
-            return 4; // Bassa priorità
+            return 4;
         }
     }
 
@@ -109,18 +102,17 @@ public class TriageController {
     private String determinaColoreDaPriorita(int priorita) {
         switch (priorita) {
             case 2:
-                return "Arancione"; // Colore arancione per alta priorità
+                return "Arancione";
             case 3:
-                return "Verde";     // Colore verde per media priorità
+                return "Verde";
             case 4:
-                return "Bianco";    // Colore bianco per bassa priorità
+                return "Bianco";
             default:
                 throw new IllegalArgumentException("Priorità non valida.");
         }
     }
 
     private void mostraMessaggioSuccesso(String messaggio) {
-        // Mostra un messaggio di successo all'utente per la creazione del ticket
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Successo");
         alert.setHeaderText(null);
