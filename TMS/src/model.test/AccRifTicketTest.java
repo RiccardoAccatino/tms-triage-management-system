@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+/**
+ *  @author DAPPIANO FRANCESCO
+ */
 public class AccRifTicketTest {
 
     private accRifTicket service;

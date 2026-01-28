@@ -11,8 +11,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
-<VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ospedale.controllers.PrenotazioneController">
+<!--@author Angie Albitres-->
+<VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PrenotazioneController">
 
     <padding>
         <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />

@@ -2,15 +2,12 @@ package model;
 
 import model.dao.PazienteDao;
 import model.pojo.Paziente;
-
 import java.util.List;
 import java.util.regex.Pattern;
-
+//@author Accatino Riccardo
 public class CompilazioneTriage {
 
     private PazienteDao pazienteDao;
-
-    // Regex per la validazione
     private static final String DATA_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
     private static final int CF_LENGHT = 16;
 
@@ -19,19 +16,16 @@ public class CompilazioneTriage {
     }
 
     /**
-     * Gestisce l'identificazione o registrazione del paziente con VALIDAZIONE.
-     * Accessibile SOLO a Dottori e Segretari.
-     * * @throws SecurityException se l'utente loggato non ha i permessi.
+     * Gestisce l'identificazione o registrazione del paziente.
+     * MODIFICA: Rimosso il controllo dei permessi per consentire l'uso pubblico.
      */
     public Paziente gestisciAnagraficaPaziente(Paziente pNuovo) {
+        // Il controllo checkPermessiPersonale() è stato rimosso per permettere l'accesso non loggato
 
-        // 1. CONTROLLO SICUREZZA (Sessione)
-        checkPermessiPersonale();
-
-        // 2. VALIDAZIONE DEI DATI
+        // VALIDAZIONE DEI DATI
         validaDatiPaziente(pNuovo);
 
-        // 3. LOGICA DI BUSINESS (Recupero o Salvataggio)
+        // LOGICA DI BUSINESS (Recupero o Salvataggio)
         List<Paziente> tuttiPazienti = pazienteDao.getAll();
 
         for (Paziente esistente : tuttiPazienti) {
@@ -48,50 +42,23 @@ public class CompilazioneTriage {
         }
     }
 
-    /**
-     * Verifica che l'utente loggato sia un membro dello staff (Dottore o Segretario).
-     */
-    private void checkPermessiPersonale() {
-        Sessione s = Sessione.getInstance();
-
-        // Nessuno loggato
-        if (s.getUtenteLoggato() == null) {
-            throw new SecurityException("Operazione non consentita: Nessun utente loggato.");
-        }
-
-        // Controllo ruolo: Solo Dottori o Segretari possono gestire l'anagrafica
-        if (!s.isDottore() && !s.isSegretario()) {
-            throw new SecurityException("Accesso Negato: Solo il personale autorizzato può gestire l'anagrafica.");
-        }
-    }
-
-    /**
-     * Metodo privato che contiene tutte le regole di validazione del Triage.
-     * Lancia IllegalArgumentException se qualcosa non va.
-     */
     private void validaDatiPaziente(Paziente p) {
-        // Controllo Nullità generale
         if (p == null) throw new IllegalArgumentException("Dati paziente assenti.");
-
-        // Controllo Campi Vuoti
         if (isVuoto(p.getNome())) throw new IllegalArgumentException("Il nome è obbligatorio.");
         if (isVuoto(p.getCognome())) throw new IllegalArgumentException("Il cognome è obbligatorio.");
         if (isVuoto(p.getIndirizzo())) throw new IllegalArgumentException("L'indirizzo è obbligatorio.");
         if (isVuoto(p.getCodiceFiscale())) throw new IllegalArgumentException("Il codice fiscale è obbligatorio.");
         if (isVuoto(p.getDataNascita())) throw new IllegalArgumentException("La data di nascita è obbligatoria.");
 
-        // Controllo Formato Data (YYYY-MM-DD)
         if (!Pattern.matches(DATA_REGEX, p.getDataNascita().trim())) {
             throw new IllegalArgumentException("La data deve essere nel formato YYYY-MM-DD (es. 1990-12-31).");
         }
 
-        // Controllo Lunghezza Codice Fiscale
         if (p.getCodiceFiscale().trim().length() != CF_LENGHT) {
             throw new IllegalArgumentException("Il Codice Fiscale deve essere di esattamente 16 caratteri.");
         }
     }
 
-    // Helper per controllare stringhe vuote o null
     private boolean isVuoto(String s) {
         return s == null || s.trim().isEmpty();
     }

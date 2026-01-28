@@ -13,8 +13,6 @@ public class db {
     public static Connection connect() {
         Connection conn = null;
         try {
-            // REGISTRAZIONE ESPLICITA: Questo forza il caricamento della classe
-            // Se IntelliJ segna errore qui (in rosso), vuol dire che la libreria manca nel progetto!
             DriverManager.registerDriver(new JDBC());
 
             conn = DriverManager.getConnection(URL);
@@ -22,20 +20,12 @@ public class db {
 
         } catch (SQLException e) {
             System.err.println("ERRORE CRITICO DB: " + e.getMessage());
-            // Stampiamo lo stack trace completo per capire cosa succede
-            e.printStackTrace();
             throw new RuntimeException("Impossibile connettersi al database.", e);
         }
         return conn;
     }
 
-    // ... lascia il resto del metodo initializeDb uguale a prima ...
     public static void initializeDb() {
-        // (codice esistente per creare le tabelle...)
-        // Copia qui il contenuto del metodo initializeDb che avevi prima
-        // ...
-
-        // Assicurati di copiare tutto il blocco con le stringhe SQL e l'esecuzione
         String sqlReparto = "CREATE TABLE IF NOT EXISTS reparto (idReparto INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, codice TEXT UNIQUE, sale INTEGER);";
         String sqlUtente = "CREATE TABLE IF NOT EXISTS utente (idUtente INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cognome TEXT NOT NULL, dataNascita TEXT NOT NULL, tipoUtente TEXT NOT NULL);";
         String sqlPaziente = "CREATE TABLE IF NOT EXISTS paziente (idUtente INTEGER PRIMARY KEY, codiceFiscale TEXT UNIQUE NOT NULL, indirizzo TEXT, FOREIGN KEY (idUtente) REFERENCES utente(idUtente));";
@@ -55,9 +45,9 @@ public class db {
             stmt.execute(sqlTicket);
             stmt.execute(sqlVisita);
             stmt.execute(sqlReferto);
-            System.out.println("Tabelle del database inizializzate con successo.");
+            System.out.println("Tabelle del database inizializzate con successo");
         } catch (SQLException e) {
-            e.printStackTrace(); // Importante per il debug
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
