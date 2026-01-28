@@ -1,166 +1,122 @@
+# TMS - Triage Management System
 
+**TMS** è un sistema software gestionale progettato per ottimizzare il flusso di lavoro all'interno di un reparto di pronto soccorso. Il sistema gestisce l'intero ciclo di vita del paziente, dall'accettazione (Triage) alla visita medica, fino alla refertazione, utilizzando un'architettura **MVC (Model-View-Controller)**.
 
-### Istruzioni per creare il file:
+Progetto universitario realizzato per il corso di Ingegneria del Software da
+* **Riccardo Accatino 20054233**
+* **Francesco Dappiano 20055270** 
+* **Angie Albitres 20054397** 
 
-1. Fai clic sul pulsante **"Copia"** nell'angolo in alto a destra del blocco di codice qui sotto.
-2. Apri il tuo editor di testo preferito (Notepad, TextEdit, VS Code, ecc.).
-3. Incolla il testo.
-4. Salva il file con il nome: `README.md` (assicurati che l'estensione sia `.md` e non `.txt`).
+## 🚀 Caratteristiche Principali
 
-Ecco il contenuto completo:
+* **Gestione Utenti:** Ruoli distinti per Segretari, Dottori e Pazienti.
+* **Triage Digitale:** Assegnazione di codici colore e priorità ai ticket.
+* **Gestione Code e Reparti:** Smistamento automatico verso i reparti competenti (Cardiologia, Ortopedia, ecc.).
+* **Calendario Visite:** Pianificazione delle visite mediche.
+* **Refertazione:** Creazione e archiviazione dei referti post-visita.
+* **Persistenza Dati:** Database SQLite integrato e portabile.
 
-```markdown
-# 🦊 GitLab Workflow & Git Cheat Sheet
+## 🛠 Tecnologia e Requisiti
 
-Benvenuti! Questa guida serve come riferimento rapido per i comandi Git che utilizziamo quotidianamente nel nostro repository GitLab.
+Il progetto è basato su **Java 21** e utilizza **Maven** per la gestione delle dipendenze.
+
+* **Linguaggio:** Java JDK 21
+* **Interfaccia Grafica (GUI):** JavaFX 21
+* **Database:** SQLite (con driver JDBC)
+* **Build Tool:** Maven
+* **Librerie di Test:** JUnit 5
+
+## ⚙️ Installazione e Configurazione
+
+1.  **Clonare il repository** o estrarre l'archivio del progetto.
+2.  Aprire il progetto con un IDE (IntelliJ IDEA raccomandato o Eclipse).
+3.  Assicurarsi che l'SDK del progetto sia impostato su **Java 21**.
+4.  Ricaricare le dipendenze Maven (Reload Project) per scaricare le librerie necessarie (JavaFX, SQLite, JUnit).
+
+## ▶️ Come Avviare l'Applicazione
+
+L'applicazione dispone di un punto di ingresso principale creato appositamente per evitare problemi di caricamento dei moduli JavaFX. Per avviarla correttamente:
+
+1.  Navigare nel package `src/main`.
+2.  Eseguire la classe **`Main.java`** (non `GuiMain`).
+
+```java
+// Percorso: TMS/src/main/Main.java
+public class Main {
+    public static void main(String[] args) {
+        GuiMain.main(args);
+    }
+}
+```
+
+> **Nota:** Al primo avvio, l'applicazione inizializzerà automaticamente il database locale `tms.db` creando tutte le tabelle necessarie.
+
+## 📦 Build ed Esportazione (.jar)
+
+Poiché il progetto utilizza Maven, è possibile generare il file eseguibile `.jar`.
+
+### Metodo 1: Tramite IDE (IntelliJ IDEA)
+1.  Aprire il pannello laterale "Maven".
+2.  Espandere il progetto > `Lifecycle`.
+3.  Fare doppio click su `clean` e successivamente su `package`.
+4.  Il file `.jar` verrà generato nella cartella `target/` all'interno del progetto.
+
+### Metodo 2: Tramite Terminale
+Aprire il terminale nella cartella radice del progetto (dove si trova il file `pom.xml`) ed eseguire:
+
+```bash
+mvn clean package
+```
+
+*Nota per l'esecuzione del JAR:* Se si esegue il jar fuori dall'IDE, assicurarsi di avere le librerie JavaFX nel path o di configurare il plugin Maven Shade/Assembly per creare un "Fat Jar" che includa tutte le dipendenze.
+
+## 🔐 Credenziali di Accesso (Dati di Test)
+
+Il database viene popolato automaticamente con i seguenti dati di test.
+
+### 1. Personale di Segreteria (Accettazione)
+Utilizzare questo account per gestire i ticket, l'accettazione e lo smistamento iniziale.
+
+| Ruolo | ID Utente (Login) | Nome |
+| :--- | :--- | :--- |
+| **Segretario** | `100` | segretario |
+
+### 2. Personale Medico (Dottori)
+Ogni dottore accede con il proprio ID ed è vincolato al proprio reparto e turno.
+
+| Reparto | ID Utente (Login) | Nome Dottore | Matricola | Turno |
+| :--- | :--- | :--- | :--- | :--- |
+| **Cardiologia** | `1` | Dr. Mario Rossi | DOC001 | Mattina |
+| **Ortopedia** | `2` | Dr. Luca Bianchi | DOC002 | Pomeriggio |
+| **Chirurgia Gen.**| `3` | Dr. Elena Verdi | DOC003 | Notte |
+| **Medicina Int.** | `4` | Dr. Gregory House | DOC004 | H24 |
+| **Neurologia** | `5` | Dr. Stephen Strange| DOC005 | Reperibile |
+
+### 3. Pazienti
+Utenti registrati per testare le funzionalità lato paziente (es. storico visite).
+
+| ID Utente | Nome | Codice Fiscale |
+| :--- | :--- | :--- |
+| `10` | Luigi Paziente | LGUPAZ95B15F205X |
+| `11` | Anna Neri | NNANRI50M70L219K |
+
+## 📂 Struttura del Progetto
+
+Il codice sorgente segue rigorosamente il pattern MVC:
+
+* `src/main`: Entry point (Main wrapper).
+* `src/gui.vista`: File FXML e Controller grafici.
+* `src/controller`: Logica di coordinamento tra View e Model.
+* `src/model`: Logica di business e classi POJO.
+* `src/model/dao`: Accesso ai dati (Data Access Objects).
+* `src/dbManager`: Configurazione SQLite e script di popolamento (`dbPopolate.java`).
+
+## 👥 Autori
+
+* **Riccardo Accatino**
+* **Francesco Dappiano**
+* **Angie Albitres**
 
 ---
+© 2026 TMS Project. All rights reserved.
 
-## 🛠 1. Configurazione Iniziale
-Se è la prima volta che usi Git su questa macchina, configura la tua identità per i log di GitLab.
-
-```bash
-# Imposta il tuo nome utente
-git config --global user.name "Il Tuo Nome"
-
-# Imposta la tua email (deve corrispondere a quella su GitLab)
-git config --global user.email "nome.cognome@azienda.com"
-
-# (Opzionale) Colora l'output per renderlo più leggibile
-git config --global color.ui auto
-
-```
-
----
-
-## 📥 2. Iniziare (Clonazione e Setup)
-
-Per scaricare il progetto in locale per la prima volta.
-
-```bash
-# Clona il repository (sostituisci l'URL con quello del progetto)
-git clone git@gitlab.com:gruppo/progetto.git
-
-# Entra nella cartella del progetto
-cd progetto
-
-```
-
----
-
-## 🔄 3. Flusso di Lavoro Quotidiano
-
-La sequenza standard per sviluppare una nuova funzionalità.
-
-### 🌿 A. Creazione Branch
-
-Non lavorare mai direttamente su `main`. Crea sempre un branch dedicato.
-
-```bash
-# 1. Spostati sul branch principale e aggiornalo
-git checkout main
-git pull origin main
-
-# 2. Crea un nuovo branch e spostatici sopra
-# Convenzione: feature/nome-feature, fix/nome-bug
-git checkout -b feature/mia-nuova-funzionalita
-
-```
-
-### 💾 B. Salvare le modifiche (Stage & Commit)
-
-Salva il tuo lavoro in locale.
-
-```bash
-# Controlla lo stato dei file
-git status
-
-# Aggiungi TUTTI i file modificati all'area di staging
-git add .
-
-# OPPURE aggiungi solo un file specifico
-git add percorso/del/file.ext
-
-# Crea il commit con un messaggio chiaro
-git commit -m "feat: aggiunta logica di login utente"
-
-```
-
-### 🚀 C. Pubblicare su GitLab (Push)
-
-Invia le modifiche al server remoto.
-
-```bash
-# La prima volta che carichi il branch
-git push -u origin feature/mia-nuova-funzionalita
-
-# Le volte successive
-git push
-
-```
-
-> **💡 GitLab Pro Tip:** Dopo il push, clicca sul link che appare nel terminale per creare subito la **Merge Request**.
-
----
-
-## 🤝 4. Sincronizzazione
-
-Se i colleghi hanno pushato codice mentre lavoravi.
-
-```bash
-# Scarica le modifiche dal server senza applicarle
-git fetch origin
-
-# Scarica e unisci le modifiche del branch corrente
-git pull
-
-# (Consigliato) Scarica e riapplica i tuoi commit sopra quelli nuovi
-git pull --rebase origin main
-
-```
-
----
-
-## 🚑 5. Emergenze e "Undo"
-
-```bash
-# Annullare modifiche a un file (revert locale)
-git checkout -- nomefile.ext
-
-# Rimuovere un file dalla staging area (dopo un 'git add' sbagliato)
-git reset HEAD nomefile.ext
-
-# Mettere da parte le modifiche temporaneamente (Stash)
-git stash
-# Recuperarle dopo
-git stash pop
-
-```
-
----
-
-## 🧹 6. Pulizia
-
-Manteniamo il repo pulito dopo il merge.
-
-```bash
-# Elimina un branch locale
-git branch -d feature/vecchia-feature
-
-# Elimina un branch forzatamente
-git branch -D feature/esperimento-fallito
-
-```
-
----
-
-## 📜 Log e Storia
-
-```bash
-# Vedi la storia dei commit (premi 'q' per uscire)
-git log
-
-# Vedi la storia grafica e compatta
-git log --oneline --graph --decorate --all
-
-```
