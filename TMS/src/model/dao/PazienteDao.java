@@ -7,7 +7,7 @@ import model.pojo.Paziente;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+//@author Accatino Riccardo
 public class PazienteDao implements Dao<Paziente> {
 
     @Override

@@ -6,8 +6,8 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
-<VBox alignment="CENTER" spacing="30.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ospedale.controllers.SecretaryController">
+<!--@author Francesco Dappiano -->
+<VBox alignment="CENTER" spacing="30.0" style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MenuController">
 
     <padding>
         <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
@@ -28,8 +28,10 @@
 
         <Button maxWidth="Infinity" onAction="#AccettaTicket" prefHeight="60.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Accettazione Ticket" />
 
-        <Button maxWidth="Infinity" onAction="#CreaNuovoTicket" prefHeight="60.0" style="-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Crea Nuovo Ticket" />
+        <Button maxWidth="Infinity" prefHeight="60.0" style="-fx-background-color: gray; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;" text="Crea Nuovo Ticket (RF7?)" />
 
+        <Button maxWidth="Infinity" onAction="#EffettuaLogout" prefHeight="60.0" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-cursor: hand; -fx-background-radius: 5;"
+                text="Logout" />
     </VBox>
 
 </VBox>

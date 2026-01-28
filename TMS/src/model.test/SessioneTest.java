@@ -9,12 +9,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+//@author Accatino Riccardo and Angie Albitres
 class SessioneTest {
 
     @AfterEach
     void tearDown() {
-        // IMPORTANTE: Resettiamo la sessione dopo ogni test per garantire l'indipendenza
         Sessione.getInstance().logout();
     }
 
@@ -31,17 +30,13 @@ class SessioneTest {
     void testLoginLogout() {
         Sessione sessione = Sessione.getInstance();
 
-        // Verifica stato iniziale
         assertNull(sessione.getUtenteLoggato(), "All'avvio nessun utente deve essere loggato");
 
-        // Simuliamo il login di un utente generico
         Utente u = new Utente(1, "Test", "User", "2000-01-01", "GENERICO");
         sessione.setUtenteLoggato(u);
 
-        // Verifica post-login
         assertEquals(u, sessione.getUtenteLoggato(), "L'utente loggato deve corrispondere a quello settato");
 
-        // Logout
         sessione.logout();
         assertNull(sessione.getUtenteLoggato(), "Dopo il logout l'utente deve essere null");
     }
@@ -94,14 +89,11 @@ class SessioneTest {
     @Test
     void testCastingErrato() {
         Sessione sessione = Sessione.getInstance();
-        // Loggiamo un Paziente
         Paziente paz = new Paziente(20, "Luigi", "Verdi", "1990-01-01", "CFTEST01", "Via Roma");
         sessione.setUtenteLoggato(paz);
 
-        // Proviamo a recuperarlo come Dottore
         Dottore d = sessione.getDottore();
 
-        // Deve ritornare null per evitare ClassCastException a runtime fuori dal model
         assertNull(d, "Se l'utente è un Paziente, getDottore() deve ritornare null");
     }
 }

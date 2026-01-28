@@ -1,5 +1,8 @@
 package model.pojo;
 
+/**
+ * @author Angie & Accatino Riccardo
+ */
 public class Visita {
     private int idVisita;
     private String dataOraInizio;
@@ -10,8 +13,7 @@ public class Visita {
     private int idPaziente;
     private int idReparto;
 
-    public Visita() {}
-
+    // Costruttore
     public Visita(int idVisita, String dataOraInizio, String dataOraFine, String sala, int idTicket, int idDottore, int idPaziente, int idReparto) {
         this.idVisita = idVisita;
         this.dataOraInizio = dataOraInizio;
@@ -23,6 +25,11 @@ public class Visita {
         this.idReparto = idReparto;
     }
 
+    public Visita(){
+        this(0, "", "", "", 0, 0, 0, 0);
+    }
+
+    //Getters e Setters
     public int getIdVisita() { return idVisita; }
     public void setIdVisita(int idVisita) { this.idVisita = idVisita; }
 
