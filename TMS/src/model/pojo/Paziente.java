@@ -1,5 +1,5 @@
 package model.pojo;
-
+//@author Accatino Riccardo
 public class Paziente extends Utente {
     private String codiceFiscale;
     private String indirizzo;

@@ -10,7 +10,7 @@ import model.pojo.Paziente;
 import model.pojo.Ticket;
 
 import java.io.IOException;
-
+//@author Accatino Riccardo
 public class TriageController {
 
     @FXML

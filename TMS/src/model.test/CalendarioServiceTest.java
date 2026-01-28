@@ -17,7 +17,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+//@author Accatino Riccardo and Angie Albitres
 class CalendarioServiceTest {
 
     private CalendarioService calendarioService;
@@ -25,7 +25,7 @@ class CalendarioServiceTest {
     @BeforeEach
     void setUp() {
         db.initializeDb();
-        Sessione.getInstance().logout(); // Reset sessione
+        Sessione.getInstance().logout();
         calendarioService = new CalendarioService();
         popolaDatabaseDiProva();
     }
@@ -37,28 +37,22 @@ class CalendarioServiceTest {
 
     @Test
     void testGetEventiGlobali_ComeSegretario_Successo() {
-        // 1. Login come Segretario
         Segretario s = new Segretario(10, "Anna", "Segretaria", "1980-01-01", 1);
         Sessione.getInstance().setUtenteLoggato(s);
 
-        // 2. Richiesta eventi globali
         List<Visita> visite = calendarioService.getEventiGlobali();
 
         assertNotNull(visite);
         assertFalse(visite.isEmpty(), "Il segretario dovrebbe vedere le visite nel DB");
 
-        // Verifica contenuto
         boolean trovato = visite.stream().anyMatch(v -> v.getIdVisita() == 500);
         assertTrue(trovato, "La visita 500 dovrebbe essere presente");
     }
 
     @Test
     void testGetEventiGlobali_AccessoNegatoDottore() {
-        // 1. Login come Dottore
         Dottore d = new Dottore(1, "Mario", "Doc", "1980-01-01", "M1", "H24", 1);
         Sessione.getInstance().setUtenteLoggato(d);
-
-        // 2. Il dottore non può vedere il calendario GLOBALE (vede solo il suo)
         assertThrows(SecurityException.class, () -> {
             calendarioService.getEventiGlobali();
         });
@@ -66,11 +60,9 @@ class CalendarioServiceTest {
 
     @Test
     void testGetEventiPersonali_ComeDottore_Successo() {
-        // 1. Login come Dottore (ID = 1, che corrisponde ai dati popolati nel DB)
         Dottore d = new Dottore(1, "Mario", "Test", "1980-01-01", "TEST01", "Mattina", 1);
         Sessione.getInstance().setUtenteLoggato(d);
 
-        // 2. Richiesta eventi personali
         List<Visita> visite = calendarioService.getEventiPersonali();
 
         assertFalse(visite.isEmpty(), "Il dottore ID 1 dovrebbe avere visite assegnate");
@@ -79,11 +71,9 @@ class CalendarioServiceTest {
 
     @Test
     void testGetEventiPersonali_AccessoNegatoPaziente() {
-        // 1. Login come Paziente
         Paziente p = new Paziente(2, "Luigi", "Paz", "1990-01-01", "CF123", "Via A");
         Sessione.getInstance().setUtenteLoggato(p);
 
-        // 2. Il paziente non ha un calendario lavorativo
         Exception e = assertThrows(SecurityException.class, () -> {
             calendarioService.getEventiPersonali();
         });
@@ -91,7 +81,6 @@ class CalendarioServiceTest {
         assertEquals("Accesso Negato: Solo i dottori possono accedere al calendario personale.", e.getMessage());
     }
 
-    // --- Metodo Helper per popolare il DB (Invariato) ---
     private void popolaDatabaseDiProva() {
         String[] sqlStatements = {
                 "DELETE FROM visita WHERE idVisita = 500;",

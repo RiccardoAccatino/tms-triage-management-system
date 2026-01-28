@@ -4,7 +4,7 @@ import model.dao.PazienteDao;
 import model.pojo.Paziente;
 import java.util.List;
 import java.util.regex.Pattern;
-
+//@author Accatino Riccardo
 public class CompilazioneTriage {
 
     private PazienteDao pazienteDao;

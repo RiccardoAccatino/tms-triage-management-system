@@ -1,5 +1,5 @@
 package model.pojo;
-
+//@author Accatino Riccardo and Angie Albitres
 public class Visita {
     private int idVisita;
     private String dataOraInizio;

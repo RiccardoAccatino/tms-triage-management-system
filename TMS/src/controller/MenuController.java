@@ -11,19 +11,15 @@ import model.pojo.Visita;
 
 import java.io.IOException;
 import java.util.List;
-
+//@author Accatino Riccardo and Angie Albitres
 public class MenuController {
 
-    // Riferimento alla ListView presente in PannelloCalendario.fxml
     @FXML
     private ListView<String> listaAppuntamenti;
 
     private final CalendarioService calendarioService = new CalendarioService();
 
-    /**
-     * Metodo chiamato automaticamente da JavaFX quando carica l'FXML.
-     * Serve per popolare il calendario se ci troviamo in quella schermata.
-     */
+
     @FXML
     public void initialize() {
         // Se listaAppuntamenti non è null, significa che siamo nella schermata PannelloCalendario
@@ -32,57 +28,47 @@ public class MenuController {
         }
     }
 
-    // --- NAVIGAZIONE ---
 
     @FXML
     public void ApriCalendarioGenerale(ActionEvent actionEvent) {
-        // Usato dal Segretario per vedere tutti gli eventi
         navigaVerso("PannelloCalendario");
     }
 
     @FXML
     public void VisualizzaCalendario(ActionEvent actionEvent) {
-        // Usato dal Dottore per vedere i propri eventi
         navigaVerso("PannelloCalendario");
     }
 
     @FXML
     public void CreaNuovoTicket(ActionEvent actionEvent) {
-        // Porta alla schermata di creazione ticket (Triage)
         navigaVerso("PannelloTriage");
     }
 
     @FXML
     public void AccettaTicket(ActionEvent actionEvent) {
-        // Porta alla schermata di gestione coda (Accettazione)
         navigaVerso("PannelloAccettazione");
     }
 
     @FXML
     public void EffettuaLogout(ActionEvent actionEvent) {
-        // 1. Resetta l'utente loggato nella sessione
         Sessione.getInstance().logout();
 
         System.out.println("Logout effettuato con successo.");
 
-        // 2. Torna alla schermata principale (Login)
         navigaVerso("PannelloUtente");
     }
 
     @FXML
     public void TornaAlMenu(ActionEvent actionEvent) {
-        // Controlla chi è loggato per tornare al menu corretto
         if (Sessione.getInstance().isDottore()) {
             navigaVerso("PannelloDottore");
         } else if (Sessione.getInstance().isSegretario()) {
             navigaVerso("PannelloSegretario");
         } else {
-            // Fallback: se per errore non c'è sessione o è un paziente, torna alla home
             navigaVerso("PannelloUtente");
         }
     }
 
-    // --- LOGICA INTERNA ---
 
     private void navigaVerso(String fxml) {
         try {
@@ -98,11 +84,9 @@ public class MenuController {
         List<Visita> visite;
 
         try {
-            // Se è Segretario -> Vede tutto (Globali)
             if (Sessione.getInstance().isSegretario()) {
                 visite = calendarioService.getEventiGlobali();
             }
-            // Se è Dottore -> Vede solo i suoi (Personali)
             else if (Sessione.getInstance().isDottore()) {
                 visite = calendarioService.getEventiPersonali();
             } else {
@@ -113,7 +97,6 @@ public class MenuController {
                 listaAppuntamenti.getItems().add("Nessun appuntamento in programma.");
             } else {
                 for (Visita v : visite) {
-                    // Formattiamo la stringa da mostrare in lista
                     String riga = String.format("Visita #%d - %s (Sala: %s)",
                             v.getIdVisita(), v.getDataOraInizio(), v.getSala());
                     listaAppuntamenti.getItems().add(riga);
