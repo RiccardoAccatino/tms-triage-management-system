@@ -117,6 +117,6 @@ Il codice sorgente segue rigorosamente il pattern MVC:
 * **Francesco Dappiano**
 * **Angie Albitres**
 
----
+----
 © 2026 TMS Project. All rights reserved.
 
